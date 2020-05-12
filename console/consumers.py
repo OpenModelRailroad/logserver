@@ -4,19 +4,8 @@ from random import randint
 import time
 from datetime import datetime
 
-messages = [
-    ('Loco #1 changed speed to %s (V as Step)' % randint(0, 255), 'loco'),
-    ('Switch %s switched to left' % randint(1, 999), 'switch'),
-    ('Switch %s switched to right' % randint(1, 999), 'switch'),
-    ('Signal %s now halt' % randint(1, 500), 'signal'),
-    ('Signal %s now attention' % randint(1, 500), 'signal'),
-    ('Signal %s now go' % randint(1, 500), 'signal'),
-    ('Lost connection to asset %s ' % randint(1, 50), 'connection'),
-    ('Connection to asset %s established' % randint(1, 50), 'connection'),
-]
 
-
-class ConsoleConsumer(WebsocketConsumer):
+class ConsoleConsumerSimulator(WebsocketConsumer):
     def connect(self):
         self.accept()
 
@@ -24,14 +13,20 @@ class ConsoleConsumer(WebsocketConsumer):
         pass
 
     def receive(self, text_data=None, bytes_data=None):
-
-        print(text_data)
         text_data_json = json.loads(text_data)
-
-        print(text_data_json)
-
         if text_data_json['message'] == "ready":
             while True:
+                messages = [
+                    ('Loco #%s changed speed to %s (V as Step)' % (randint(1, 25), randint(0, 255)), 'loco'),
+                    ('Loco #%s issued function F%s' % (randint(1, 25), randint(1, 20)), 'loco'),
+                    ('Switch %s switched to left' % randint(1, 999), 'switch'),
+                    ('Switch %s switched to right' % randint(1, 999), 'switch'),
+                    ('Signal %s now halt' % randint(1, 500), 'signal'),
+                    ('Signal %s now attention' % randint(1, 500), 'signal'),
+                    ('Signal %s now go' % randint(1, 500), 'signal'),
+                    ('Lost connection to asset %s ' % randint(1, 50), 'connection'),
+                    ('Connection to asset %s established' % randint(1, 50), 'connection'),
+                ]
                 message = randint(0, 7)
 
                 self.send(

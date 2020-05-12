@@ -9,11 +9,17 @@
     <link rel="stylesheet" href="{% static 'css/console.css' %}">
 
     <div class="container">
-        <h4>Console</h4>
         <div class="form-group">
-            <textarea id="message-log" class="form-control console-log" cols="100" rows="20"
-                      readonly="readonly"></textarea><br>
+            <span class="display-5">Console</span>
+            <div class="float-right">
+                <span id="message-status" class="message-status"></span>
+                <div id="message-bubble" class="message-bubble">&nbsp;</div>
+            </div>
         </div>
+
+        <textarea id="message-log" class="form-control console-log" cols="100" rows="20"
+                  readonly="readonly"></textarea><br>
+
         <div class="form-group">
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
@@ -36,28 +42,82 @@
                 <input class="form-check-input" type="checkbox" id="scrollCheckbox" checked>
                 <label class="form-check-label" for="scrollCheckbox">Autoscroll</label>
             </div>
+
+            <div class="form-group float-right mr-2 ml-2">
+                <button onclick="closeConnection()" class="btn btn-sm btn-secondary ">Close Connection
+                </button>
+            </div>
+
         </div>
-
-        <small><span id="message-status"></span></small>
-
     </div>
     <script>
+
+
         console.log('ws://' + window.location.host + '/ws/console/');
         document.querySelector('#message-status').innerHTML = 'connecting to server';
 
+        const wsLocation = 'ws://' + window.location.host + '/ws/console/';
         let message_count = 0;
         let message_storage = [];
 
-        const chatSocket = new WebSocket(
-            'ws://' + window.location.host + '/ws/console/'
-        );
+        let chatSocket = new WebSocket(wsLocation);
+
+        function cleanupConsoleLog() {
+            let content = document.getElementById("message-log");
+            let lines = content.value.split('\n');
+            let newlines = lines.slice(Math.max(lines.length / 2, 0))
+            content.value = "";
+            newlines.forEach(line => {
+                content.value = line + '\n'
+            });
+        }
+
+        function closeConnection() {
+            chatSocket.close()
+        }
+
+        function setStatus(status) {
+
+            const statusElement = document.getElementById("message-status");
+            const statusBubble = document.getElementById("message-bubble");
+            let statusText = "";
+
+            switch (status) {
+                case 'CONNECTING':
+                    statusText = 'Connecting to server'
+                    statusBubble.style.backgroundColor = '#f39c12';
+                    statusBubble.style.borderColor = '#f1c40f';
+                    break;
+                case 'CONNECTED':
+                    statusText = 'Connected to server'
+                    statusBubble.style.backgroundColor = '#27ae60';
+                    statusBubble.style.borderColor = '#2ecc71';
+                    break;
+                case 'ERROR':
+                    statusText = 'Error on server connection'
+                    statusBubble.style.backgroundColor ='#c0392b';
+                    statusBubble.style.borderColor = '#e74c3c';
+                    break;
+                case 'CLOSED':
+                default:
+                    statusText = 'Connection closed to server'
+                    statusBubble.style.backgroundColor = '#7f8c8d';
+                    statusBubble.style.borderColor = '#95a5a6';
+                    break;
+            }
+            statusElement.innerHTML = statusText;
+        }
+
 
         chatSocket.onmessage = function (e) {
+            setStatus('CONNECTED');
+
             const data = JSON.parse(e.data);
             const messagelog = document.querySelector('#message-log');
 
             message_storage.push(data);
             message_count++;
+
 
             switch (data.category) {
                 case 'loco':
@@ -73,34 +133,26 @@
                     if (document.getElementById("connectionCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
                     break;
             }
-
-            console.log(data);
-
-
-            document.querySelector('#message-status').innerHTML = 'connected to server';
-
             if (document.getElementById("scrollCheckbox").checked) {
                 const textarea = document.getElementById('message-log');
                 textarea.scrollTop = textarea.scrollHeight;
             }
         };
 
-        chatSocket.onerror = function (e) {
-            console.error(e);
-            document.querySelector('#message-status').innerHTML = 'connection error';
+        chatSocket.onerror = function () {
+            setStatus('ERROR');
         }
 
-        chatSocket.onclose = function (e) {
-            document.querySelector('#message-status').innerHTML = 'connection to server closed';
+        chatSocket.onclose = function () {
+            setStatus('CLOSED')
         };
 
-        chatSocket.onopen = function (e) {
+        chatSocket.onopen = function () {
+            setStatus('CONNECTING')
             chatSocket.send(JSON.stringify({
                 'message': 'ready'
             }));
-            document.querySelector('#message-status').innerHTML = 'connected to server';
         }
-
 
     </script>
 {% endblock %}
