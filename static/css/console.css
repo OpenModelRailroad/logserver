@@ -1,0 +1,5 @@
+.console-log, .console-log:read-only {
+    background-color: #1d2124;
+    color: #7ed6df;
+    font-family: 'Menlo', 'Consolas', monospace;
+}

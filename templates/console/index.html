@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    {% include 'menu.html' %}
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/console.css' %}">
+
+    <div class="container">
+        <h4>Console</h4>
+        <div class="form-group">
+            <textarea id="message-log" class="form-control console-log" cols="100" rows="20"
+                      readonly="readonly"></textarea><br>
+        </div>
+        <div class="form-group">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
+                <label class="form-check-label" for="locoCheckbox">Loco</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="switchCheckbox" checked>
+                <label class="form-check-label" for="switchCheckbox">Switch</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="signalCheckbox" checked>
+                <label class="form-check-label" for="signalCheckbox">Signal</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="connectionCheckbox" checked>
+                <label class="form-check-label" for="connectionCheckbox">Connection</label>
+            </div>
+
+            <div class="form-check form-check-inline float-right">
+                <input class="form-check-input" type="checkbox" id="scrollCheckbox" checked>
+                <label class="form-check-label" for="scrollCheckbox">Autoscroll</label>
+            </div>
+        </div>
+
+        <small><span id="message-status"></span></small>
+
+    </div>
+    <script>
+        console.log('ws://' + window.location.host + '/ws/console/');
+        document.querySelector('#message-status').innerHTML = 'connecting to server';
+
+        let message_count = 0;
+        let message_storage = [];
+
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/console/'
+        );
+
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const messagelog = document.querySelector('#message-log');
+
+            message_storage.push(data);
+            message_count++;
+
+            switch (data.category) {
+                case 'loco':
+                    if (document.getElementById("locoCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                    break;
+                case 'signal':
+                    if (document.getElementById("signalCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                    break;
+                case 'switch':
+                    if (document.getElementById("switchCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                    break;
+                case 'connection':
+                    if (document.getElementById("connectionCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                    break;
+            }
+
+            console.log(data);
+
+
+            document.querySelector('#message-status').innerHTML = 'connected to server';
+
+            if (document.getElementById("scrollCheckbox").checked) {
+                const textarea = document.getElementById('message-log');
+                textarea.scrollTop = textarea.scrollHeight;
+            }
+        };
+
+        chatSocket.onerror = function (e) {
+            console.error(e);
+            document.querySelector('#message-status').innerHTML = 'connection error';
+        }
+
+        chatSocket.onclose = function (e) {
+            document.querySelector('#message-status').innerHTML = 'connection to server closed';
+        };
+
+        chatSocket.onopen = function (e) {
+            chatSocket.send(JSON.stringify({
+                'message': 'ready'
+            }));
+            document.querySelector('#message-status').innerHTML = 'connected to server';
+        }
+
+
+    </script>
+{% endblock %}

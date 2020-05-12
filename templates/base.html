@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>{% block title %}OMRR Logserver{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+</head>
+<body>
+<div>
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
