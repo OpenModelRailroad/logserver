@@ -12,3 +12,8 @@
 5. Install all requirements from file with ```pip install -r requirements.txt```
 6. Migrate Database with ```python manage.py migrate```
 7. Start the server with ```python manage.py runserver```
+
+Alternative you can run the install script in /scripts. (needs sudo or ```chmod u+x ./scripts/*.sh``` on all scripts)
+
+## Docker integration (not finished implemented)
+You can use the docker integration. Just run ```docker-compose up```
