@@ -16,4 +16,9 @@
 Alternative you can run the install script in /scripts. (needs sudo or ```chmod u+x ./scripts/*.sh```)
 
 ## Docker integration (not finished implemented)
-You can use the docker integration. Just run ```docker-compose up```
+You can use the docker integration. Just run ```docker-compose up```  
+
+## To be considered
+* https://django-split-settings.readthedocs.io/en/latest/
+* InfluxDB QL
+* https://stackoverflow.com/questions/50198741/django-influxdb

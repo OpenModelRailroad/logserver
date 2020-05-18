@@ -6,6 +6,14 @@ from dj_database_url import parse as db_url
 ASGI_APPLICATION = 'logserver.routing.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
+#Influx
+INFLUXDB_HOST = 'influxdb'
+INFLUXDB_PORT = 8086
+INFLUXDB_USERNAME = None
+INFLUXDB_PASSWORD = None
+INFLUXDB_DATABASE = 'example'
+INFLUXDB_TIMEOUT = 10
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
 
