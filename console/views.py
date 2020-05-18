@@ -7,4 +7,4 @@ def index(request):
 
 
 def blank(request):
-    return render(request, 'console/blank.html')
+    return render(request, 'console/search.html')

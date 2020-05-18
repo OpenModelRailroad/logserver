@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='console-index'),
-    path('blank/', views.blank, name='console-blank')
+    path('blank/', views.blank, name='console-search')
 ]

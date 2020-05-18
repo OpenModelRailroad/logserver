@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% include 'menu.html' %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/console.css' %}">
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <span class="display-5">LogSearch</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <form>
+                    <div class="form-group mt-3">
+
+                        <div class="input-group">
+                            <input type="text" class="form-control code-input" placeholder="SELECT * ..."
+                                   aria-label="InfluxQL" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search
+                                </button>
+                            </div>
+                        </div>
+                        <small id="qlHelp" class="form-text text-muted">You can use
+                            <a href="https://bit.ly/368IdOU" target="_blank"><code>InfluxQL</code></a>
+                            to query assets. Only Select Statements are allowed.</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <span class="display-6">Results</span>
+                <hr>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
