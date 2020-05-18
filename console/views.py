@@ -6,5 +6,5 @@ def index(request):
     return render(request, 'console/index.html')
 
 
-def blank(request):
+def search(request):
     return render(request, 'console/search.html')
