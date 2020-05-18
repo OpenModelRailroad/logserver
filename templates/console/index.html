@@ -145,6 +145,8 @@
 
         chatSocket.onclose = function () {
             setStatus('CLOSED')
+            //todo
+            //try reconnect
         };
 
         chatSocket.onopen = function () {
