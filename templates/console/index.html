@@ -50,66 +50,22 @@
 
         </div>
     </div>
+    <script src="{% static 'js/reconnecting-ws.min.js' %}"></script>
     <script>
-
-
-        console.log('ws://' + window.location.host + '/ws/console/');
-        document.querySelector('#message-status').innerHTML = 'connecting to server';
-
         const wsLocation = 'ws://' + window.location.host + '/ws/console/';
+
         let message_count = 0;
         let message_storage = [];
 
-        let chatSocket = new WebSocket(wsLocation);
-
-        function cleanupConsoleLog() {
-            let content = document.getElementById("message-log");
-            let lines = content.value.split('\n');
-            let newlines = lines.slice(Math.max(lines.length / 2, 0))
-            content.value = "";
-            newlines.forEach(line => {
-                content.value = line + '\n'
-            });
-        }
-
-        function closeConnection() {
-            chatSocket.close()
-        }
-
-        function setStatus(status) {
-
-            const statusElement = document.getElementById("message-status");
-            const statusBubble = document.getElementById("message-bubble");
-            let statusText = "";
-
-            switch (status) {
-                case 'CONNECTING':
-                    statusText = 'Connecting to server'
-                    statusBubble.style.backgroundColor = '#f39c12';
-                    statusBubble.style.borderColor = '#f1c40f';
-                    break;
-                case 'CONNECTED':
-                    statusText = 'Connected to server'
-                    statusBubble.style.backgroundColor = '#27ae60';
-                    statusBubble.style.borderColor = '#2ecc71';
-                    break;
-                case 'ERROR':
-                    statusText = 'Error on server connection'
-                    statusBubble.style.backgroundColor ='#c0392b';
-                    statusBubble.style.borderColor = '#e74c3c';
-                    break;
-                case 'CLOSED':
-                default:
-                    statusText = 'Connection closed to server'
-                    statusBubble.style.backgroundColor = '#7f8c8d';
-                    statusBubble.style.borderColor = '#95a5a6';
-                    break;
-            }
-            statusElement.innerHTML = statusText;
-        }
+        let logSocket = new ReconnectingWebSocket(wsLocation, null, {
+            debug: false,
+            reconnectInterval: {{ reconnect_intervall }},
+            reconnectAttempts: {{ reconnect_attempts }}
+        })
 
 
-        chatSocket.onmessage = function (e) {
+        console.log('ws://' + window.location.host + '/ws/console/');
+        logSocket.onmessage = function (e) {
             setStatus('CONNECTED');
 
             const data = JSON.parse(e.data);
@@ -137,23 +93,72 @@
                 const textarea = document.getElementById('message-log');
                 textarea.scrollTop = textarea.scrollHeight;
             }
-        };
+        }
 
-        chatSocket.onerror = function () {
+        logSocket.onerror = function () {
             setStatus('ERROR');
         }
 
-        chatSocket.onclose = function () {
+        logSocket.onclose = function () {
             setStatus('CLOSED')
-            //todo
-            //try reconnect
+            // wait 5 seconds and try to reconnect
+            // console.error("Connection closed, try to reconnect to " + wsLocation)
+            // setTimeout(() => connect(wsLocation), 5000)
         };
 
-        chatSocket.onopen = function () {
+        logSocket.onopen = function () {
             setStatus('CONNECTING')
-            chatSocket.send(JSON.stringify({
+            logSocket.send(JSON.stringify({
                 'message': 'ready'
             }));
+        }
+
+
+        function closeConnection() {
+            logSocket.close()
+        }
+
+
+        function cleanupConsoleLog() {
+            let content = document.getElementById("message-log");
+            let lines = content.value.split('\n');
+            let newlines = lines.slice(Math.max(lines.length / 2, 0))
+            content.value = "";
+            newlines.forEach(line => {
+                content.value = line + '\n'
+            });
+        }
+
+        function setStatus(status) {
+
+            const statusElement = document.getElementById("message-status");
+            const statusBubble = document.getElementById("message-bubble");
+            let statusText = "";
+
+            switch (status) {
+                case 'CONNECTING':
+                    statusText = 'Connecting to server'
+                    statusBubble.style.backgroundColor = '#f39c12';
+                    statusBubble.style.borderColor = '#f1c40f';
+                    break;
+                case 'CONNECTED':
+                    statusText = 'Connected to server'
+                    statusBubble.style.backgroundColor = '#27ae60';
+                    statusBubble.style.borderColor = '#2ecc71';
+                    break;
+                case 'ERROR':
+                    statusText = 'Error on server connection'
+                    statusBubble.style.backgroundColor = '#c0392b';
+                    statusBubble.style.borderColor = '#e74c3c';
+                    break;
+                case 'CLOSED':
+                default:
+                    statusText = 'Connection closed to server'
+                    statusBubble.style.backgroundColor = '#7f8c8d';
+                    statusBubble.style.borderColor = '#95a5a6';
+                    break;
+            }
+            statusElement.innerHTML = statusText;
         }
 
     </script>

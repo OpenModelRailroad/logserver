@@ -14,6 +14,10 @@ INFLUXDB_PASSWORD = None
 INFLUXDB_DATABASE = 'example'
 INFLUXDB_TIMEOUT = 10
 
+CONSOLE_RECONNECT_INTERVALL = 5000
+CONSOLE_RECONNECT_ATTEMPTS = 'null'
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
 
