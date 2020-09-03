@@ -8,46 +8,69 @@
 
     <link rel="stylesheet" href="{% static 'css/console.css' %}">
 
-    <div class="container">
-        <div class="form-group">
-            <span class="display-5">Console</span>
-            <div class="float-right">
-                <span id="message-status" class="message-status"></span>
-                <div id="message-bubble" class="message-bubble">&nbsp;</div>
-            </div>
-        </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8 col-console">
 
-        <textarea id="message-log" class="form-control console-log" cols="100" rows="20"
-                  readonly="readonly"></textarea><br>
+                <div class="form-group">
+                    <span class="display-5">Console</span>
+                    <div class="float-right">
 
-        <div class="form-group">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
-                <label class="form-check-label" for="locoCheckbox">Loco</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="switchCheckbox" checked>
-                <label class="form-check-label" for="switchCheckbox">Switch</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="signalCheckbox" checked>
-                <label class="form-check-label" for="signalCheckbox">Signal</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="connectionCheckbox" checked>
-                <label class="form-check-label" for="connectionCheckbox">Connection</label>
+                    </div>
+                </div>
+
+                <textarea id="message-log" class="form-control console-log" cols="100" rows="20"
+                          readonly="readonly"></textarea><br>
+
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
+                        <label class="form-check-label" for="locoCheckbox"><img class="cb-icon"
+                                                                                src="{% static 'images/loco.png' %}"></label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="switchCheckbox" checked>
+                        <label class="form-check-label" for="switchCheckbox"><img class="cb-icon"
+                                                                                  src="{% static 'images/track.png' %}"></label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="signalCheckbox" checked>
+                        <label class="form-check-label" for="signalCheckbox"><img class="cb-icon"
+                                                                                  src="{% static 'images/signal.png' %}"></label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="connectionCheckbox" checked>
+                        <label class="form-check-label" for="connectionCheckbox"><img class="cb-icon"
+                                                                                      src="{% static 'images/connection.png' %}"></label>
+                    </div>
+
+                    <div class="form-check form-check-inline float-right">
+                        <input class="form-check-input" type="checkbox" id="scrollCheckbox" checked>
+                        <label class="form-check-label" for="scrollCheckbox">Autoscroll</label>
+                    </div>
+
+                    <div class="form-group float-right mr-2 ml-2">
+                        <button onclick="closeConnection()" class="btn btn-sm btn-secondary ">Close Connection
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="form-check form-check-inline float-right">
-                <input class="form-check-input" type="checkbox" id="scrollCheckbox" checked>
-                <label class="form-check-label" for="scrollCheckbox">Autoscroll</label>
-            </div>
+            <div class="col-4 col-stats">
+                <span class="display-5">Stats</span>
 
-            <div class="form-group float-right mr-2 ml-2">
-                <button onclick="closeConnection()" class="btn btn-sm btn-secondary ">Close Connection
-                </button>
-            </div>
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="list-group">
+                            <li class="list-group-item">Server Connection: <div id="message-bubble" class="message-bubble">&nbsp;</div> <span id="message-status"></span></li>
+                            <li class="list-group-item">Connected Sniffers: <span id="stats-num-sniffer">{{ connected_sniffers }}</span></li>
+                            <li class="list-group-item">Received Messages: NaN</li>
+                        </ul>
+                    </div>
+                </div>
 
+            </div>
         </div>
     </div>
     <script src="{% static 'js/reconnecting-ws.min.js' %}"></script>
@@ -93,6 +116,8 @@
                 const textarea = document.getElementById('message-log');
                 textarea.scrollTop = textarea.scrollHeight;
             }
+
+            document.getElementById('stats-num-sniffer').innerText = data.sniffers;
         }
 
         logSocket.onerror = function () {

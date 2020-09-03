@@ -21,3 +21,8 @@
 .code-input{
     font-family: 'Menlo', 'Consolas', monospace;
 }
+
+.cb-icon{
+    width: 20px;
+    height: auto;
+}

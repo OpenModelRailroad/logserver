@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% include 'menu.html' %}
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/sniffer-management.css' %}">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <span class="display-5">Sniffer Management</span>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for sniffer in sniffers %}
+
+                <div class="col-auto mb-3">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <img class="sniffer-icon mx-auto d-block" src="{% static 'images/raspi.png' %}">
+                            </h5>
+                            <p class="card-text">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td scope="col">Hostname</td>
+                                    <td>{{ sniffer.hostname }}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col">Mac Addr</td>
+                                    <td>{{ sniffer.mac }}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col">IP</td>
+                                    <td>{{ sniffer.ip }}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col">Connected</td>
+                                    <td>{{ sniffer.is_connected }}</td>
+                                </tr>
+                            </table>
+                            </p>
+                            <a href="#" class="card-link float-right"><img class="sniffer-card-icon"
+                                                                           src="{% static 'images/setttings.png' %}"></a>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+        </div>
+    </div>
+
+
+{% endblock %}

@@ -3,6 +3,7 @@ from channels.generic.websocket import WebsocketConsumer
 from random import randint
 import time
 from datetime import datetime
+from .models import Sniffer
 
 
 class ConsoleConsumerSimulator(WebsocketConsumer):
@@ -16,6 +17,7 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         if text_data_json['message'] == "ready":
             while True:
+                sniffers = Sniffer.objects.filter(is_connected=True)
                 messages = [
                     ('Loco #%s changed speed to %s (V as Step)' % (randint(1, 25), randint(0, 255)), 'loco'),
                     ('Loco #%s issued function F%s' % (randint(1, 25), randint(1, 20)), 'loco'),
@@ -33,7 +35,8 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
                     text_data=json.dumps({
                         'message': messages[message][0],
                         'category': messages[message][1],
-                        'timestamp': datetime.now().strftime('%H:%M:%S.%f')[:-3]
+                        'timestamp': datetime.now().strftime('%H:%M:%S.%f')[:-3],
+                        'sniffers': len(sniffers)
                     })
                 )
                 time.sleep((randint(1, 50) / 100))

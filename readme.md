@@ -22,3 +22,4 @@ You can use the docker integration. Just run ```docker-compose up```
 * https://django-split-settings.readthedocs.io/en/latest/
 * InfluxDB QL
 * https://stackoverflow.com/questions/50198741/django-influxdb
+* https://django-q.readthedocs.io/en/latest/architecture.html

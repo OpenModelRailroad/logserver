@@ -1,4 +1,5 @@
 {% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="{% url 'console-index' %}">
         <img src="{% static 'images/omrr-logo.png' %}" width="30" height="30" alt="">
@@ -16,7 +17,17 @@
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'console-search' %}">LogSearch</a>
             </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url 'console-sniffer-management' %}">Sniffer Management</a>
+            </li>
         </ul>
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href=""><img class="menu-icon" src="{% static 'images/setttings-white.png' %}"></a>
+            </li>
+        </ul>
+
         <!--form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
