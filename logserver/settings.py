@@ -1,4 +1,5 @@
 import os
+
 from decouple import config, Csv
 from dj_database_url import parse as db_url
 
@@ -6,7 +7,7 @@ from dj_database_url import parse as db_url
 ASGI_APPLICATION = 'logserver.routing.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
-#Influx
+# Influx
 INFLUXDB_HOST = 'influxdb'
 INFLUXDB_PORT = 8086
 INFLUXDB_USERNAME = None
@@ -16,7 +17,6 @@ INFLUXDB_TIMEOUT = 10
 
 CONSOLE_RECONNECT_INTERVALL = 5000
 CONSOLE_RECONNECT_ATTEMPTS = 'null'
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     # Third Party Packages
     'channels',
+    'django_q',
 
     # Application Packages
     'console',
@@ -84,18 +85,10 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -118,3 +111,30 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 LOGIN_REDIRECT_URL = '/'
+
+''' Configuration if REDIS is used, must be tested if needed
+Q_CLUSTER = {
+    'name': 'logserver-q',
+    'workers': 8,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0, }
+}
+'''
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 90,
+    'retry': 120,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default'
+}
