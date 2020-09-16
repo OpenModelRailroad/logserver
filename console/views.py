@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
-from .models import Sniffer
-
+from sniffer.models import Sniffer
 
 # Create your views here.
 def index(request):
@@ -20,8 +19,4 @@ def search(request):
     return render(request, 'console/search.html')
 
 
-def sniffer_management(request):
 
-    sniffers = Sniffer.objects.all()
-
-    return render(request, 'console/sniffer-management.html', {'sniffers':sniffers})

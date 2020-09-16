@@ -3,7 +3,7 @@ from channels.generic.websocket import WebsocketConsumer
 from random import randint
 import time
 from datetime import datetime
-from .models import Sniffer
+from sniffer.models import Sniffer
 
 
 class ConsoleConsumerSimulator(WebsocketConsumer):
