@@ -65,7 +65,7 @@
                         <ul class="list-group">
                             <li class="list-group-item">Server Connection: <div id="message-bubble" class="message-bubble">&nbsp;</div> <span id="message-status"></span></li>
                             <li class="list-group-item">Connected Sniffers: <span id="stats-num-sniffer">{{ connected_sniffers }}</span></li>
-                            <li class="list-group-item">Received Messages: NaN</li>
+                            <li class="list-group-item">Received Messages: <span id="stats-num-messages">NaN</span></li>
                         </ul>
                     </div>
                 </div>
@@ -117,7 +117,9 @@
                 textarea.scrollTop = textarea.scrollHeight;
             }
 
+            // Stats Panel Update in RT
             document.getElementById('stats-num-sniffer').innerText = data.sniffers;
+            document.getElementById('stats-num-messages').innerText = message_count;
         }
 
         logSocket.onerror = function () {
