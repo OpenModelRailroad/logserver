@@ -41,6 +41,8 @@ INSTALLED_APPS = [
 
     # Application Packages
     'console',
+    'appsettings',
+    'sniffer',
 ]
 
 MIDDLEWARE = [
