@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import Sniffer
 
 
@@ -6,4 +7,14 @@ from .models import Sniffer
 def sniffer_management(request):
     sniffers = Sniffer.objects.all()
 
-    return render(request, 'console/sniffer-management.html', {'sniffers': sniffers})
+    return render(request, 'sniffer/index.html', {'sniffers': sniffers})
+
+
+def remove_sniffer(request, mac=None):
+    if mac is None:
+        messages.error(request, 'No Mac Address received.')
+        return redirect('sniffer-index')
+    else:
+        Sniffer.objects.filter(mac=mac).delete()
+        messages.success(request, 'Removed Sniffer %s.' % mac)
+        return redirect('sniffer-index')

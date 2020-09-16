@@ -18,7 +18,7 @@ Alternative you can run the install script in /scripts. (needs sudo or ```chmod 
 ## Testing Sniffer connecting
 * Check if the message "waiting for sniffers on <host>:<port>" appears.  
 * connect to the logserver with ````nc -v <host> <port>````
-* send a message ```{'ip':'127.0.0.1', 'mac': '00:80:41:ae:fd:7e', 'hostname': 'block_01'}```
+* send a message ```{'ip':'127.0.0.1', 'mac': '00:80:41:ae:fd:7f', 'hostname': 'block_01'}```
 
 
 ## Docker integration (not finished implemented)

@@ -2,6 +2,10 @@ from django.apps import AppConfig
 import socket
 import threading
 import json
+import sys
+import logging
+
+logger = logging.getLogger('main')
 
 
 class SnifferConfig(AppConfig):
@@ -19,6 +23,9 @@ class SnifferConfig(AppConfig):
 
 def sniffer_server(port):
     from .models import Sniffer
+
+    print("Starting Sniffer Connection Server on port %s" % port)
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', port)
 
@@ -35,14 +42,23 @@ def sniffer_server(port):
             msg = data.decode("utf-8").replace("'", '"')
             jmsg = json.loads(msg)
 
-            obj, created = Sniffer.objects.update_or_create(
-                hostname=jmsg['hostname'],
-                ip=jmsg['ip'],
-                mac=jmsg['mac'],
-                is_connected=True
-            )
+            try:
+                e = Sniffer.objects.get(mac=jmsg['mac'])
+                e.ip = jmsg['ip']
+                e.hostname = jmsg['hostname']
+                e.is_connected = True
+                e.save()
 
-            if created:
-                print('insert or updated sniffer %s (%s)' % (jmsg['mac'], jmsg['ip']))
-            else:
-                print('some error happend while insert or update %s (%s)' % (jmsg['mac'], jmsg['ip']))
+                print('updated sniffer %s (%s)' % (jmsg['mac'], jmsg['ip']))
+
+            except Sniffer.DoesNotExist:
+                Sniffer.objects.create(
+                    hostname=jmsg['hostname'],
+                    ip=jmsg['ip'],
+                    mac=jmsg['mac'],
+                    is_connected=True,
+                ).save()
+
+                print('created sniffer %s (%s)' % (jmsg['mac'], jmsg['ip']))
+
+            connection.close()

@@ -1,4 +1,5 @@
 import os
+from django.contrib.messages import constants as messages
 
 from decouple import config, Csv
 from dj_database_url import parse as db_url
@@ -139,4 +140,11 @@ Q_CLUSTER = {
     'queue_limit': 50,
     'bulk': 10,
     'orm': 'default'
+}
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
 }
