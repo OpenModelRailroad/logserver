@@ -15,7 +15,7 @@
                 <a class="nav-link" href="{% url 'console-index' %}">Console</a>
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'console-search' %}">LogSearch</a>
+                <a class="nav-link" href="{% url 'logsearch-index' %}">LogSearch</a>
             </li>
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'sniffer-index' %}">Sniffer Management</a>
@@ -24,8 +24,7 @@
 
         <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'appsettings-index' %}"><img class="menu-icon"
-                                                                           src="{% static 'images/setttings-white.png' %}"></a>
+                <a class="nav-link" href="{% url 'appsettings-index' %}"><i class="fas fa-cogs"></i></a>
             </li>
         </ul>
 

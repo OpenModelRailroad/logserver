@@ -1,0 +1,13 @@
+
+.col-logsearch{
+    background-color: #ffffff;
+}
+.tab-content {
+    height: 100px;
+    overflow: auto;
+    background-color: #FFFFFF;
+}
+
+input{
+    font-family: "Consolas","Dina","Lucida Console","Menlo","Source Code Pro",monospace;
+}

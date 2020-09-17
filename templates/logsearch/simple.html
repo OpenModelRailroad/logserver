@@ -1,0 +1,129 @@
+<div class="container-fluid">
+
+    <div class="row mt-3">
+        <div class="col">
+
+            <form class="form-inline">
+                <label class="mr-1" for="assetSelect">Asset</label>
+                <select class="form-control ml-2 mr-2" id="assetSelect">
+                    <option>All</option>
+                    <option>Loco</option>
+                    <option>Track</option>
+                    <option>Signal</option>
+                </select>
+
+                <label class="ml-1" for="whichSelect">Which</label>
+                <select class="form-control ml-1" id="whichSelect">
+                    <option id="all">All</option>
+                    <option id="number">N°</option>
+                </select>
+
+                <input type="number" class="form-control col-1 ml-1 mr-2" max="999" id="numberInput">
+
+                <input class="form-check-input ml-1" type="checkbox" value="" id="defaultCheck1">
+                <label class="form-check-label mr-2" for="defaultCheck1"><i class="far fa-clock"></i></label>
+
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="orderOption" id="orderDesc"
+                           value="desc" checked>
+                    <label class="form-check-label" for="inlineRadio1"><i
+                            class="fas fa-long-arrow-alt-down"></i></label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="orderOption" id="orderAsc"
+                           value="asc">
+                    <label class="form-check-label" for="inlineRadio2"><i
+                            class="fas fa-long-arrow-alt-up"></i></label>
+                </div>
+
+                <button type="submit" class="btn btn-outline-secondary ml-2"><i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <small><code id="query"></code>
+                <a href="#" id="copyQuery" class="btn btn-link btn-sm" data-toggle="tooltip" data-placement="top"
+                   title="Copy Query"><i class="far fa-copy"></i></a> </small>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $("#copyQuery").click(function (e) {
+        e.preventDefault();
+        copyToClipboard("#query");
+        $(this).tooltip('dispose');
+        $(this).prop('title', 'copied');
+        $(this).tooltip('show');
+    });
+
+    $("#copyQuery").mouseleave(function () {
+        $(this).tooltip('dispose');
+        $(this).prop('title', 'Copy Query');
+        $(this).tooltip('enable');
+    });
+
+
+    $('[data-toggle="tooltip"]').tooltip()
+    $("#numberInput").hide();
+    createQuery();
+
+    $("#whichSelect").on("change", function () {
+        let id = $(this).children(":selected").attr("id");
+
+        if (id === "number") {
+            $("#numberInput").show(500);
+        } else {
+            $("#numberInput").hide(500);
+        }
+    });
+
+    $("select").change(function () {
+        createQuery();
+    });
+
+    $("input[type=number]").keyup(function () {
+        createQuery();
+    });
+
+    $("input[type=radio]").change(function () {
+        createQuery();
+    });
+
+    function createQuery() {
+        console.log("create the new Query");
+
+        let query = "SELECT";
+        const table = "from sniffer.messages";
+
+        let which = $("#whichSelect").children(":selected").attr("id");
+
+        if (which === "all") {
+            query = query + " * " + table;
+        } else {
+
+            if ($("#assetSelect").val() !== "All") {
+                query = query + " * " + table + " WHERE " + $("#assetSelect").val().toLowerCase() + "_id = " + $("#numberInput").val();
+            } else {
+                query = query + " * " + table;
+            }
+
+        }
+
+        let order = $('input[name=orderOption]:checked').val()
+        query = query + " order by timestamp " + order + ";";
+        $("#query").text(query);
+    }
+
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(element).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+</script>

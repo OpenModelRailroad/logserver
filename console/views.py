@@ -15,8 +15,7 @@ def index(request):
     return render(request, 'console/index.html', context)
 
 
-def search(request):
-    return render(request, 'console/search.html')
+
 
 
 
