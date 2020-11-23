@@ -2,7 +2,6 @@ from django.apps import AppConfig
 import socket
 import threading
 import json
-import sys
 import logging
 
 logger = logging.getLogger('main')
