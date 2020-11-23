@@ -9,6 +9,7 @@ def index(request):
         'logpath': get_value_for_key('logpath'),
         'listensniffers': get_value_for_key('listensniffers'),
         'listenport': int(get_value_for_key('listenport')),
+        'simulator': get_value_for_key('simulator'),
     }
     return render(request, 'settings/index.html', settings)
 
