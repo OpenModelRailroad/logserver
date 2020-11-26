@@ -4,9 +4,17 @@ from random import randint
 import time
 from datetime import datetime
 from sniffer.models import Sniffer
+from logserver.helper import Helper
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ConsoleConsumerSimulator(WebsocketConsumer):
+    simulator = True
+    i = 0
+    helper = Helper()
+
     def connect(self):
         self.accept()
 
@@ -16,6 +24,7 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         if text_data_json['message'] == "ready":
+
             while True:
                 sniffers = Sniffer.objects.filter(is_connected=True)
                 messages = [
@@ -30,6 +39,7 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
                     ('Connection to asset %s established' % randint(1, 50), 'connection'),
                 ]
                 message = randint(0, 7)
+
 
                 self.send(
                     text_data=json.dumps({

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.conf import settings
 from sniffer.models import Sniffer
 
+
 # Create your views here.
 def index(request):
     sniffer = Sniffer.objects.filter(is_connected=True)
@@ -13,9 +14,3 @@ def index(request):
     }
 
     return render(request, 'console/index.html', context)
-
-
-
-
-
-
