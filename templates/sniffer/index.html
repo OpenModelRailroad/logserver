@@ -34,7 +34,11 @@
                         <div class="card" style="width: 18rem;">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    <img class="sniffer-icon mx-auto d-block" src="{% static 'images/raspi.png' %}">
+                                    {% if sniffer.ip == '0.0.0.0' %}
+                                        <img class="sniffer-icon mx-auto d-block" src="{% static 'images/sim.png' %}">
+                                    {% else %}
+                                        <img class="sniffer-icon mx-auto d-block" src="{% static 'images/raspi.png' %}">
+                                    {% endif %}
                                 </h5>
                                 <p class="card-text">
                                 <table class="table table-sm">
