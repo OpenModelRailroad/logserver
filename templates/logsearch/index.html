@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/logsearch.css' %}">
     <div class="container">
 
-        <div class="row">
+        <div class="row bg-transparent">
             <div class="col">
                 <span class="display-5">LogSearch</span>
             </div>
@@ -26,26 +26,32 @@
                            aria-controls="advanced" aria-selected="false">Advanced</a>
                     </li>
                 </ul>
-                <div class="tab-content" id="myTabContent">
+                <div class="tab-content search-panel-top" id="myTabContent">
                     <div class="tab-pane fade show active" id="simple" role="tabpanel" aria-labelledby="simple-tab">
-                            {% include 'logsearch/simple.html' %}
+                        {% include 'logsearch/simple.html' %}
                     </div>
                     <div class="tab-pane fade" id="advanced" role="tabpanel" aria-labelledby="advanced-tab">
-                        <form>
+                        <form id="advanced-search-form" class="p-2">
                             <div class="form-group mt-3">
 
                                 <div class="input-group">
-                                    <input type="text" class="form-control code-input" placeholder="SELECT * ..."
+                                    <input type="text" class="form-control code-input" id="advanced-search-input"
+                                           placeholder="SELECT * ..."
                                            aria-label="InfluxQL" aria-describedby="button-addon2">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button" id="button-addon2">
+                                        <button class="btn btn-outline-secondary" type="submit" id="button-addon2">
                                             Search
                                         </button>
                                     </div>
                                 </div>
-                                <!--small id="qlHelp" class="form-text text-muted">You can use
-                                    <a href="https://bit.ly/368IdOU" target="_blank"><code>InfluxQL</code></a>
-                                    to query assets. Only Select Statements are allowed.</small-->
+                                <small id="qlHelp" class="form-text text-muted ml-2">
+                                    <i id="statement-ok" class="fas fa-check-square text-success">
+                                        <code>Creating Select Statement</code>
+                                    </i>
+                                    <i id="statement-nok" class="fas fa-exclamation-triangle text-danger">
+                                        <code>Only Select Statements are allowed.</code>
+                                    </i>
+                                </small>
                             </div>
                         </form>
                     </div>
@@ -54,13 +60,61 @@
         </div>
 
         <div class="row">
-            <div class="col col-logsearch">
-                <span class="display-6">Results</span>
-                <hr>
+            <div class="col">
+                <div class="bg-white p-2">
+                    <span class="display-6">Results</span>
+                    <hr>
+                </div>
+
             </div>
         </div>
 
     </div>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#statement-ok").hide();
+
+            $("#advanced-search-form").focusout((e) => {
+                checkSearchinput(searchterm)
+            })
+
+            $("#advanced-search-form").keyup((e) => {
+                searchterm = $("#advanced-search-input").val().toLowerCase()
+
+                if (searchterm.length >= 0) {
+                    checkSearchinput(searchterm)
+                }
+            })
+
+            $("#advanced-search-form").submit((e) => {
+                e.preventDefault();
+                searchterm = $("#advanced-search-input").val().toLowerCase()
+
+                if (searchterm === null || searchterm === undefined || searchterm === "") {
+                    alert("there was no input in the searchterm")
+                } else if (!searchterm.startsWith("select")) {
+                    alert("only select statements are allowed")
+                } else {
+                    alert("tried to send advanced form " + searchterm);
+                }
+            })
+
+
+        })
+
+        function checkSearchinput(term) {
+            if (term.startsWith("select")) {
+                $("#statement-nok").hide();
+                $("#statement-ok").show();
+            } else {
+                $("#statement-ok").hide();
+                $("#statement-nok").show();
+            }
+        }
+
+    </script>
 
 
 {% endblock %}

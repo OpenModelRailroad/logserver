@@ -1,6 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
-from random import randint
+from random import randint, uniform
 import time
 from datetime import datetime
 from sniffer.models import Sniffer
@@ -22,6 +22,10 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
         pass
 
     def receive(self, text_data=None, bytes_data=None):
+
+        print(text_data)
+        print(bytes_data)
+
         text_data_json = json.loads(text_data)
         if text_data_json['message'] == "ready":
 
@@ -38,14 +42,26 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
                     ('Lost connection to asset %s ' % randint(1, 50), 'connection'),
                     ('Connection to asset %s established' % randint(1, 50), 'connection'),
                 ]
-                message = randint(0, 7)
 
+                msg_types = [
+                    'console',
+                    'unplausible'
+                ]
+
+                message = randint(0, 7)
+                msg_range = uniform(0.0, 10.0)
+                msg_type = 1
+
+                if msg_range < 9.9:
+                    msg_type = 0
 
                 self.send(
                     text_data=json.dumps({
+                        'type': msg_types[msg_type],
                         'message': messages[message][0],
                         'category': messages[message][1],
                         'timestamp': datetime.now().strftime('%H:%M:%S.%f')[:-3],
+                        'second': datetime.now().strftime('%S'),
                         'sniffers': len(sniffers)
                     })
                 )

@@ -34,7 +34,7 @@
                         <div class="card" style="width: 18rem;">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    {% if sniffer.ip == '0.0.0.0' %}
+                                    {% if 'simulator' in sniffer.hostname %}
                                         <img class="sniffer-icon mx-auto d-block" src="{% static 'images/sim.png' %}">
                                     {% else %}
                                         <img class="sniffer-icon mx-auto d-block" src="{% static 'images/raspi.png' %}">
@@ -56,7 +56,12 @@
                                     </tr>
                                     <tr>
                                         <td scope="col">Connected</td>
-                                        <td>{{ sniffer.is_connected }}</td>
+                                        <td>
+                                            {% if sniffer.is_connected %}
+                                                <i class="fas fa-check-square text-success"></i>
+                                            {% else %}
+                                                <i class="fas fa-exclamation-triangle text-danger"></i>
+                                            {% endif %}
                                     </tr>
                                 </table>
                                 </p>

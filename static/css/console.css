@@ -13,16 +13,34 @@
     line-height: 8px;
     border: 1px solid #95a5a6;
 }
-.message-status{
+
+.message-status {
     font-size: 14px;
     line-height: 10px;
 }
 
-.code-input{
+.code-input {
     font-family: 'Menlo', 'Consolas', monospace;
 }
 
-.cb-icon{
+.cb-icon {
     width: 20px;
     height: auto;
+}
+
+.unplausible-messages-container {
+    max-height: 200px;
+    overflow: auto;
+}
+
+.table {
+    height: 200px;
+    background-color: #ffffff;
+}
+
+thead tr:nth-child(1) th {
+    background: white;
+    position: sticky;
+    top: -1px;
+    z-index: 10;
 }

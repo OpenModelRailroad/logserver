@@ -1,6 +1,11 @@
+.tab-content {
+    height: 80vh;
+    overflow: auto;
+    background-color: #FFFFFF;
+}
+
 
 .col-logsearch{
-    background-color: #ffffff;
 }
 .tab-content {
     height: 100px;
@@ -10,4 +15,9 @@
 
 input{
     font-family: "Consolas","Dina","Lucida Console","Menlo","Source Code Pro",monospace;
+}
+
+
+.search-panel-top{
+    overflow: hidden;
 }

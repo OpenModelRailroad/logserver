@@ -23,6 +23,7 @@
                           readonly="readonly"></textarea><br>
 
                 <div class="form-group">
+                    Filter:
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
                         <label class="form-check-label" for="locoCheckbox"><img class="cb-icon"
@@ -58,27 +59,123 @@
             </div>
 
             <div class="col-4 col-stats">
-                <span class="display-5">Stats</span>
+                <span class="display-6">Stats</span>
 
                 <div class="row">
                     <div class="col-12">
                         <ul class="list-group">
-                            <li class="list-group-item">Server Connection: <div id="message-bubble" class="message-bubble">&nbsp;</div> <span id="message-status"></span></li>
-                            <li class="list-group-item">Connected Sniffers: <span id="stats-num-sniffer">{{ connected_sniffers }}</span></li>
+                            <li class="list-group-item">Server Connection:
+                                <div id="message-bubble" class="message-bubble">&nbsp;</div>
+                                <span id="message-status"></span></li>
+                            <li class="list-group-item">Connected Sniffers: <span
+                                    id="stats-num-sniffer">{{ connected_sniffers }}</span></li>
                             <li class="list-group-item">Received Messages: <span id="stats-num-messages">NaN</span></li>
+                            <li class="list-group-item">Unplausible Messages: <span
+                                    id="stats-num-unplausible">0</span></li>
                         </ul>
                     </div>
                 </div>
 
+                <span class="display-6">Message Graph</span>
+                <canvas id="messageChart" style="background-color: #ffffff; border-radius: 3px" width="400"
+                        height="200"></canvas>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 col-console">
+                <span class="display-6">Detected unplausible Messages</span>
+                <div class="unplausible-messages-container">
+                    <table id="unplausible-messages" class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Message</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
     <script src="{% static 'js/reconnecting-ws.min.js' %}"></script>
     <script>
+
         const wsLocation = 'ws://' + window.location.host + '/ws/console/';
 
         let message_count = 0;
         let message_storage = [];
+        let unplausible_count = 0;
+        let unplausible_storage = [];
+
+        let ctx = $('#messageChart');
+        let messageChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'messages',
+                    data: [],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+
+        function addData(chart, data, second) {
+
+            chart.data.datasets.forEach((dataset) => {
+
+                dataset.data.push(data)
+
+                console.log(dataset)
+
+                chart.data.labels.forEach((label) => {
+                        if (second.toString() === label) {
+                            console.log(true)
+                            dataset.data.push(2)
+                        } else {
+                            chart.data.labels.push(second);
+                            dataset.data.push(data)
+                            console.log(false)
+                        }
+                    }
+                );
+
+            });
+
+            chart.update();
+        }
+
+        function addUnplausibleMessage(data) {
+            let unplausible_table = document.getElementById("unplausible-messages");
+            var row = unplausible_table.insertRow(1)
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+
+            cell1.innerHTML = data.timestamp;
+            cell2.innerHTML = data.message;
+
+            unplausible_storage.push(data);
+            unplausible_count++;
+            document.getElementById('stats-num-unplausible').innerText = unplausible_count;
+
+        }
+
 
         let logSocket = new ReconnectingWebSocket(wsLocation, null, {
             debug: false,
@@ -94,32 +191,39 @@
             const data = JSON.parse(e.data);
             const messagelog = document.querySelector('#message-log');
 
-            message_storage.push(data);
-            message_count++;
+            if (data.type === 'console') {
+                message_storage.push(data);
+                message_count++;
+                addData(messageChart, 1, data.second);
 
 
-            switch (data.category) {
-                case 'loco':
-                    if (document.getElementById("locoCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                    break;
-                case 'signal':
-                    if (document.getElementById("signalCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                    break;
-                case 'switch':
-                    if (document.getElementById("switchCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                    break;
-                case 'connection':
-                    if (document.getElementById("connectionCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                    break;
+                switch (data.category) {
+                    case 'loco':
+                        if (document.getElementById("locoCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                        break;
+                    case 'signal':
+                        if (document.getElementById("signalCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                        break;
+                    case 'switch':
+                        if (document.getElementById("switchCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                        break;
+                    case 'connection':
+                        if (document.getElementById("connectionCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
+                        break;
+                }
+                if (document.getElementById("scrollCheckbox").checked) {
+                    const textarea = document.getElementById('message-log');
+                    textarea.scrollTop = textarea.scrollHeight;
+                }
+
+                // Stats Panel Update in RT
+                document.getElementById('stats-num-sniffer').innerText = data.sniffers;
+                document.getElementById('stats-num-messages').innerText = message_count;
+            } else {
+                addUnplausibleMessage(data)
             }
-            if (document.getElementById("scrollCheckbox").checked) {
-                const textarea = document.getElementById('message-log');
-                textarea.scrollTop = textarea.scrollHeight;
-            }
 
-            // Stats Panel Update in RT
-            document.getElementById('stats-num-sniffer').innerText = data.sniffers;
-            document.getElementById('stats-num-messages').innerText = message_count;
+
         }
 
         logSocket.onerror = function () {
