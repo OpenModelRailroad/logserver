@@ -9,6 +9,7 @@ install:
 # command to run tests
 env:
   - SECRET_KEY=123456NOTTHEACTUALKEY
+  - ALLOWED_HOSTS=*
 script:
   - python manage.py migrate
   - python manage.py test 
