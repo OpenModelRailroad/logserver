@@ -8,8 +8,7 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 env:
-  - SECRET_KEY=123456NOTTHEACTUALKEY
-  - ALLOWED_HOSTS=*
+  - SECRET_KEY=123456NOTTHEACTUALKEY ALLOWED_HOSTS=* DEBUG=True
 script:
   - python manage.py migrate
   - python manage.py test 
