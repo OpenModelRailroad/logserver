@@ -1,9 +1,8 @@
 from django.apps import AppConfig
-from .dccpi import *
-import threading
 import logging
 import queue
 from django.db import connection
+from logserver.dccpi import DCCDecoder
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +13,12 @@ class RailmessagesConfig(AppConfig):
     threadpool = []
 
     def ready(self):
-        print("Start transformer thread")
-        logger.info("Start transformer thread")
-        transform = threading.Thread(target=transform_messages, name='transform-thread')
-        transform.start()
-        self.threadpool.append(transform)
+        # print("Start transformer thread")
+        # logger.info("Start transformer thread")
+        # transform = threading.Thread(target=transform_messages, name='transform-thread', daemon=True)
+        # transform.start()
+        # self.threadpool.append(transform)
+        pass
 
 
 def transform_messages():
@@ -29,6 +29,13 @@ def transform_messages():
 
         for raw_message in raw_messages:
             print("TRANSFORMED %s" % raw_message.msg_json)
+
+            decoder = DCCDecoder('0b' + raw_message.msg_raw)
+            address = decoder.get_address()
+            command = decoder.get_command()
+
+            print('got address %d' % address)
+            print(command)
 
             if raw_message.id is not None:
                 if raw_message.id > 10_000:

@@ -7,7 +7,7 @@ from sniffer.models import Sniffer
 from logserver.helper import Helper
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("logserver")
 
 
 class ConsoleConsumerSimulator(WebsocketConsumer):
@@ -23,8 +23,7 @@ class ConsoleConsumerSimulator(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
 
-        print(text_data)
-        print(bytes_data)
+        logger.info("client connected %s" % text_data)
 
         text_data_json = json.loads(text_data)
         if text_data_json['message'] == "ready":

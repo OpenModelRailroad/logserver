@@ -23,14 +23,52 @@
         </ul>
 
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="{% url 'appsettings-index' %}"><i class="fas fa-cogs"></i></a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-tools"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'appsettings-index' %}"><i class="fas fa-sliders-h"></i> Settings</a>
+                    <a class="dropdown-item stopserver text-danger" href="#" data-toggle="modal"
+                       data-target="#stopServerModal"><i class="fas fa-power-off"></i> Shutdown</a>
+                </div>
             </li>
         </ul>
-
-        <!--form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form-->
     </div>
 </nav>
+
+
+<!-- Shutdown Modal -->
+<div class="modal fade" id="stopServerModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+     aria-labelledby="stopServerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stopServerModalLabel">Stopping Logserver</h5>
+            </div>
+            <div class="modal-body">
+                Do you really want shutdown the Server?
+                <span id="shutdownmessage"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Cancel</button>
+                <form id="shutdownform" method="post" action="{% url 'appsettings-shutdown' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">Shutdown</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(".stopserver").on("click", function () {
+        window.history.pushState("object or string", "Title", "/");
+    })
+
+    $("#shutdownform").on("submit", function () {
+        $("#shutdownmessage").html("</br><span class='text-success'>Server is now shutting down</span>")
+        window.history.pushState("object or string", "Title", "/");
+    })
+</script>

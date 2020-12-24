@@ -28,7 +28,7 @@ class CommandMessage(models.Model):
         ]
 
     address = models.IntegerField(null=False)
-    sniffer = models.ForeignKey(Sniffer, on_delete=models.DO_NOTHING)
+    sniffer = models.ForeignKey(Sniffer, on_delete=models.SET_DEFAULT, default=0)
 
     def __str__(self):
         return self.address

@@ -17,11 +17,6 @@
     along with "dccpi".  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .dcc_controller import DCCController
-from .dcc_locomotive import DCCLocomotive
-from .dcc_dummy_encoder import DCCDummyEncoder
-from .dcc_rpi_encoder import DCCRPiEncoder
-from .dcc_packet_factory import DCCPacketFactory
+from .sniffer_init import SnifferInit
 
-__all__ = ['DCCController', 'DCCLocomotive', 'DCCDummyEncoder',
-           'DCCRPiEncoder', 'DCCPacketFactory']
+__all__ = ['SnifferInit']

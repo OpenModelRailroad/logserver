@@ -8,22 +8,16 @@ from dj_database_url import parse as db_url
 ASGI_APPLICATION = 'logserver.routing.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
-# Influx
-INFLUXDB_HOST = 'influxdb'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = None
-INFLUXDB_PASSWORD = None
-INFLUXDB_DATABASE = 'example'
-INFLUXDB_TIMEOUT = 10
-
 CONSOLE_RECONNECT_INTERVALL = 5000
 CONSOLE_RECONNECT_ATTEMPTS = 'null'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
 
+SNIFFER_MISSED_HEARTBEATS = 2
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool, default=False)
+DEBUG = config('DEBUG', cast=bool, default=True)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
@@ -46,6 +40,7 @@ INSTALLED_APPS = [
     'appsettings',
     'railmessages',
     'sniffer',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
@@ -117,13 +112,15 @@ STATICFILES_DIRS = [
 LOGIN_REDIRECT_URL = '/'
 
 Q_CLUSTER = {
-    'name': 'DjangORM',
+    'name': 'omrr-logserver',
     'workers': 4,
-    'timeout': 90,
+    'timeout': 60,
     'retry': 120,
     'queue_limit': 50,
     'bulk': 10,
-    'orm': 'default'
+    'orm': 'default',
+    'save_limit': -1,
+    'guard_loop': 30
 }
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -153,7 +150,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'INFO',
-            'filters': ['require_debug_true'],
+            # 'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'django.server',
         },
@@ -164,8 +161,8 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console',],
+        'logserver': {
+            'handlers': ['console', ],
             'level': 'INFO',
         },
         'django.server': {

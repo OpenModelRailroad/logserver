@@ -6,7 +6,7 @@ class Sniffer(models.Model):
     ip = models.GenericIPAddressField()
     mac = models.CharField(max_length=17)
     is_connected = models.BooleanField(default=False)
-    last_connection = models.DateTimeField(auto_now=False, null=True)
+    last_connection = models.DateTimeField(auto_now=False, auto_now_add=False, auto_created=False, null=True)
     port = models.IntegerField()
 
     def __str__(self):

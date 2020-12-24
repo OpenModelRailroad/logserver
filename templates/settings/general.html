@@ -42,16 +42,26 @@
             </form>
 
         </div>
-
-
     </div>
+
+    <!--div class="row">
+        <div class="col">
+            <button type="button" class="btn btn-outline-danger stopserver" data-toggle="modal"
+                    data-target="#stopServerModal">
+                <i class="fas fa-power-off"></i> Stop Server
+            </button>
+        </div>
+    </div-->
+
     <div class="col fixed-bottom text-center pt-5 mt-5">
-        <small><pre>Settings are autosaved. Just stop typing.</pre></small>
+        <small>
+            <pre>Settings are autosaved. Just stop typing.</pre>
+        </small>
     </div>
 </div>
 
-<script src></script>
 <script>
+
 
     let timeout = null;
 
@@ -133,7 +143,7 @@
                 success: (d) => {
 
                     var state = "off";
-                    if(that.checked){
+                    if (that.checked) {
                         state = "on"
                     }
 

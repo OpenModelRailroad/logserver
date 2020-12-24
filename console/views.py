@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.conf import settings
 from sniffer.models import Sniffer
 
+from django_q.tasks import async_task
+
 
 # Create your views here.
 def index(request):
