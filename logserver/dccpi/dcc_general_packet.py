@@ -18,6 +18,7 @@
 """
 
 import sys
+
 from bitstring import BitArray
 
 

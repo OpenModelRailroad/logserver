@@ -18,6 +18,7 @@
 """
 
 import sys
+
 from .dcc_packet_factory import DCCPacketFactory
 
 

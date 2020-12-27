@@ -17,8 +17,9 @@
     along with "dccpi".  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .dcc_packet_factory import DCCPacketFactory
 import sys
+
+from .dcc_packet_factory import DCCPacketFactory
 
 
 class DCCLocomotive(object):

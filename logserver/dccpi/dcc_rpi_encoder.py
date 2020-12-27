@@ -20,6 +20,10 @@
 from .dcc_encoder import DCCEncoder
 #import dcc_rpi_encoder_c
 import operator
+# import dcc_rpi_encoder_c
+import operator
+
+from .dcc_encoder import DCCEncoder
 
 
 class DCCRPiEncoder(DCCEncoder):

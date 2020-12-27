@@ -2,7 +2,6 @@
     Copyright (C) 2020  Florian Thiévent
 """
 
-import sys
 import bitstring
 
 

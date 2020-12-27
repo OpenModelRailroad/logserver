@@ -17,8 +17,9 @@
     along with "dccpi".  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .dcc_encoder import DCCEncoder
 import time
+
+from .dcc_encoder import DCCEncoder
 
 
 class DCCDummyEncoder(DCCEncoder):

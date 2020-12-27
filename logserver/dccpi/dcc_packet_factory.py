@@ -18,6 +18,7 @@
 """
 
 from bitstring import BitArray
+
 from .dcc_general_packet import DCCGeneralPacket
 
 

@@ -1,9 +1,30 @@
-from datetime import datetime, timedelta
+"""
+    Copyright (C) 2020  OpenModelRailRoad, Florian Thiévent
+
+    This file is part of "OMRR".
+
+    "OMRR" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    "OMRR" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import logging
 import time
+from datetime import datetime
+
 from dateutil import tz
-from sniffer.models import Sniffer
 from django.conf import settings
+
+from sniffer.models import Sniffer
 
 logger = logging.getLogger("logserver")
 
@@ -17,16 +38,14 @@ def check_active_sniffer():
             delta = now - sniffer.last_connection
             delta_seconds = delta.total_seconds()
 
-            if settings.DEBUG:
-                logger.info(
-                    "Checking Sniffer =============================================================================")
-                logger.info("Hostname %s " % sniffer.hostname)
-                logger.info("Last Connection Time: %s" % sniffer.last_connection)
-                logger.info("time delta: %s" % delta)
-                logger.info("delta_seconds: %s" % delta_seconds)
-                logger.info("Connected: %s" % sniffer.is_connected)
-                logger.info(
-                    "==============================================================================================")
+            logger.debug("==============================================================================================")
+            logger.debug("Checking Sniffer")
+            logger.debug("Hostname %s " % sniffer.hostname)
+            logger.debug("Last Connection Time: %s" % sniffer.last_connection)
+            logger.debug("time delta: %s" % delta)
+            logger.debug("delta_seconds: %s" % delta_seconds)
+            logger.debug("Connected: %s" % sniffer.is_connected)
+            logger.debug("==============================================================================================")
 
             # if delta between two heartbeats is greather than 20 seconds, 2 heartbeats are missed
             if delta_seconds >= 60.0:
@@ -34,7 +53,7 @@ def check_active_sniffer():
                 sniffer.save()
                 try:
                     sniffer.delete()
-                    logger.info("Removed Sniffer")
+                    logger.info("Removed Sniffer %s because of inactivity" % sniffer.hostname)
                 except Exception as e:
                     logger.error("Cannot remove not connected sniffer %s: %s" % (sniffer.hostname, e))
             if 11.0 < delta_seconds < (settings.SNIFFER_MISSED_HEARTBEATS * 10.0):

@@ -17,9 +17,9 @@
     along with "dccpi".  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
-import threading
 import sys
+import threading
+import time
 
 
 class DCCController(object):

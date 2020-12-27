@@ -1,20 +1,37 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponseServerError
+"""
+    Copyright (C) 2020  OpenModelRailRoad, Florian Thiévent
 
-from .models import Appsettings
-from django.http import HttpResponse
-from logserver import tasks
+    This file is part of "OMRR".
+
+    "OMRR" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    "OMRR" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import logging
+
+from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponseServerError
+from django.shortcuts import render, redirect
+
+from logserver import tasks
+from .models import Appsettings
 
 logger = logging.getLogger("logserver")
 
 
 def index(request):
     settings = {
-        'logpath': get_value_for_key('logpath'),
         'listensniffers': get_value_for_key('listensniffers'),
         'listenport': int(get_value_for_key('listenport')),
-        'simulator': get_value_for_key('simulator'),
     }
     return render(request, 'settings/index.html', settings)
 

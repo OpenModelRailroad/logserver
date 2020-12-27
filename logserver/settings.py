@@ -1,25 +1,41 @@
+"""
+    Copyright (C) 2020  OpenModelRailRoad, Florian Thiévent
+
+    This file is part of "OMRR".
+
+    "OMRR" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    "OMRR" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import os
-from django.contrib.messages import constants as messages
+import sys
 
 from decouple import config, Csv
 from dj_database_url import parse as db_url
+from django.contrib.messages import constants as messages
 
 # OMRR Settings
 ASGI_APPLICATION = 'logserver.routing.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
-CONSOLE_RECONNECT_INTERVALL = 5000
-CONSOLE_RECONNECT_ATTEMPTS = 'null'
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
-
-SNIFFER_MISSED_HEARTBEATS = 2
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool, default=True)
-
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
+CONSOLE_RECONNECT_INTERVALL = 5000
+CONSOLE_RECONNECT_ATTEMPTS = 'null'
+SNIFFER_MISSED_HEARTBEATS = 2
+MESSAGE_RETENTION_TIME = 86400
 
 # Application definition
 
@@ -36,11 +52,13 @@ INSTALLED_APPS = [
     'django_q',
 
     # Application Packages
-    'console',
     'appsettings',
+    'console',
+    'core',
+    'logsearch',
     'railmessages',
     'sniffer',
-    'core.apps.CoreConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -56,20 +74,18 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'logserver.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+    {'BACKEND': 'django.template.backends.django.DjangoTemplates',
+     'DIRS': [os.path.join(BASE_DIR, 'templates')],
+     'APP_DIRS': True,
+     'OPTIONS': {
+         'context_processors': [
+             'django.template.context_processors.debug',
+             'django.template.context_processors.request',
+             'django.contrib.auth.context_processors.auth',
+             'django.contrib.messages.context_processors.messages',
+         ],
+     },
+     },
 ]
 
 DATABASES = {
@@ -79,10 +95,6 @@ DATABASES = {
         cast=db_url
     )
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -90,25 +102,17 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.0/topics/i18n/
-
 LANGUAGE_CODE = 'de-CH'
 TIME_ZONE = 'Europe/Zurich'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 LOGIN_REDIRECT_URL = '/'
 
 Q_CLUSTER = {
@@ -133,42 +137,74 @@ MESSAGE_TAGS = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-    },
     'formatters': {
-        'django.server': {
+        'logserver.console': {
             '()': 'django.utils.log.ServerFormatter',
-            'format': '%(asctime)s %(levelname)s: %(name)s %(message)s',
+            'format': '%(asctime)s %(levelname)s: %(threadName)s %(name)s %(message)s',
+        },
+        'logserver.file': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '%(asctime)s %(levelname)s: %(threadName)s %(name)s %(message)s',
         }
     },
     'handlers': {
         'console': {
             'level': 'INFO',
-            # 'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
-            'formatter': 'django.server',
+            'formatter': 'logserver.console',
+            'stream': sys.stdout
         },
-        'django.server': {
-            'level': 'INFO',
+        'django.console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'django.server',
+            'formatter': 'logserver.console',
+            'stream': sys.stdout
         },
+        'qconsole': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'logserver.console',
+            'stream': sys.stdout
+        },
+        'logserver-file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR + "/log/omrr-logserver.log",
+            'maxBytes': 500000,
+            'backupCount': 5,
+            'formatter': 'logserver.file',
+        },
+
     },
     'loggers': {
         'logserver': {
             'handlers': ['console', ],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
-        'django.server': {
-            'handlers': ['django.server'],
-            'level': 'INFO',
+        'django': {
+            'handlers': ['console', ],
+            'level': 'DEBUG',
             'propagate': False,
         },
+        'django.server': {
+            'handlers': ['console', ],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['console', ],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', ],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django-q': {
+            'handlers': ['qconsole', ],
+            'level': 'DEBUG',
+        },
     }
+
 }
