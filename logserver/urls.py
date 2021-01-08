@@ -17,16 +17,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
-
+import os
 from django.contrib import admin
 from django.urls import path, include
-
+from django.conf import settings as djsettings
 from appsettings import urls as settings
 from console import urls as console
 from logsearch import urls as logsearch
 from sniffer import urls as sniffer_url
 from . import tasks
 from .sniffers import SnifferInit
+from django_q.tasks import async_task
 
 logger = logging.getLogger("logserver")
 
@@ -38,13 +39,18 @@ urlpatterns = [
     path('', include(console)),
 ]
 
-
 # Add one time start elements here
+'''
+Comment this block out to migrate database and not starting the cluster and sniffer server
+'''
+# Start Message Cluster
 logger.info("Start the Message Cluster")
-
 tasks.start_message_cluster()
 
 # Start the Sniffer Server
-sniffers = SnifferInit()
-sniffers.start_sniffer_manager_thread()
-sniffers.start_sniffer_server_thread()
+logger.info("Starting Sniffer Server and Management")
+async_task("logserver.tasks.start_sniffer_manager", q_options={'task_name': 'start-sniffer-manager'})
+async_task("logserver.tasks.start_sniffer_server", q_options={'task_name': 'start-sniffer-server'})
+'''
+END --- Comment this block out to migrate database and not starting the cluster and sniffer server
+'''

@@ -23,5 +23,13 @@ from . import views
 urlpatterns = [
     path('', views.index, name='appsettings-index'),
     path('save-setting/', views.save_setting, name='appsettings-save-setting'),
-    path('shutdown/', views.server_shutdown, name='appsettings-shutdown')
+    path('shutdown/', views.server_shutdown, name='appsettings-shutdown'),
+    path('restart-q-cluster/', views.restart_q_cluster, name='appsettings-restart-q-cluster'),
+    path('restart-sniffer-server/', views.restart_sniffer_server, name='appsettings-restart-sniffer-server'),
+    path('stop-sniffer-manager/', views.stop_sniffer_manager, name='appsettings-stop-sniffer-manager'),
+    path('stop-sniffer-server/', views.stop_sniffer_server, name='appsettings-stop-sniffer-server'),
+    path('dump-data-csv/', views.dump_data_csv, name='appsettings-dump-data-csv'),
+    path('dump-data-json/', views.dump_data_json, name='appsettings-dump-data-json'),
+    path('cleanup-database/', views.cleanup_database, name='appsettings-cleanup-database'),
+    path('remove-all-messages/', views.remove_all_messages, name='appsettings-remove-all-messages'),
 ]

@@ -55,7 +55,9 @@
                                 <h5 class="card-title">
                                     {% if 'sim' in sniffer.hostname %}
                                         <img class="sniffer-icon mx-auto d-block" src="{% static 'images/sim.png' %}">
-                                    {% else %}
+                                    {% elif 'cli' == sniffer.hostname %}
+                                        <img class="sniffer-icon mx-auto d-block" src="{% static 'images/console.png' %}">
+                                    {% else  %}
                                         <img class="sniffer-icon mx-auto d-block" src="{% static 'images/raspi.png' %}">
                                     {% endif %}
                                 </h5>

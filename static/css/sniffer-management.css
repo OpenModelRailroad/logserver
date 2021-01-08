@@ -19,7 +19,12 @@
 .sniffer-icon{
     width: 100px;
     height: auto;
-    border-radius: 50%;
+
+}
+.sniffer-icon-round{
+    width: 100px;
+    height: auto;
+
 }
 
 .sniffer-card-icon{

@@ -93,11 +93,6 @@
                         </ul>
                     </div>
                 </div>
-
-                <span class="display-6">Message Graph</span>
-                <canvas id="messageChart" style="background-color: #ffffff; border-radius: 3px" width="400"
-                        height="200"></canvas>
-
             </div>
         </div>
         <div class="row">
@@ -126,59 +121,6 @@
         let unplausible_count = 0;
         let unplausible_storage = [];
 
-        let ctx = $('#messageChart');
-        let messageChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'messages',
-                    data: [],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                }
-            }
-        });
-
-
-        function addData(chart, data, second) {
-
-            chart.data.datasets.forEach((dataset) => {
-
-                dataset.data.push(data)
-
-                console.log(dataset)
-
-                chart.data.labels.forEach((label) => {
-                        if (second.toString() === label) {
-                            console.log(true)
-                            dataset.data.push(2)
-                        } else {
-                            chart.data.labels.push(second);
-                            dataset.data.push(data)
-                            console.log(false)
-                        }
-                    }
-                );
-
-            });
-
-            chart.update();
-        }
-
         function addUnplausibleMessage(data) {
             let unplausible_table = document.getElementById("unplausible-messages");
             var row = unplausible_table.insertRow(1)
@@ -202,7 +144,7 @@
         })
 
 
-        console.log('ws://' + window.location.host + '/ws/console/');
+
         logSocket.onmessage = function (e) {
             setStatus('CONNECTED');
 
@@ -212,8 +154,6 @@
             if (data.type === 'console') {
                 message_storage.push(data);
                 message_count++;
-                addData(messageChart, 1, data.second);
-
 
                 switch (data.category) {
                     case 'loco':
@@ -256,6 +196,7 @@
         };
 
         logSocket.onopen = function () {
+            console.log('connecting to ws://' + window.location.host + '/ws/console/');
             setStatus('CONNECTING')
             logSocket.send(JSON.stringify({
                 'message': 'ready'

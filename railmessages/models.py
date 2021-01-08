@@ -19,19 +19,21 @@
 from django.db import models
 
 from sniffer.models import Sniffer
+from .choices import MESSAGE_TYPE
 
 
 # Model for all RAW Messgaes received by the Sniffer Server.
 class RawMessage(models.Model):
     class Meta:
         indexes = [
-            models.Index(fields=['id', 'msg_raw'])
+            models.Index(fields=['msg_raw'])
         ]
 
-    msg_type = models.CharField(max_length=50, null=False)
+    msg_type = models.CharField(max_length=3, choices=MESSAGE_TYPE, default='def', null=False)
     msg_json = models.CharField(max_length=512, null=False)
     msg_raw = models.CharField(max_length=50, null=True)
     sniffer = models.ForeignKey(Sniffer, on_delete=models.SET_NULL, blank=True, null=True)
+    received = models.DateTimeField(auto_created=False, auto_now_add=False, auto_now=True, blank=True, null=True)
     recv_date = models.DateField(auto_now=True)
     recv_time = models.TimeField(auto_now=True)
 
@@ -42,12 +44,20 @@ class RawMessage(models.Model):
 # Parsed Messages
 class CommandMessage(models.Model):
     class Meta:
+        verbose_name = 'Command Message'
+        verbose_name_plural = 'Command Messages'
         indexes = [
-            models.Index(fields=['id', 'address', 'sniffer'])
+            models.Index(fields=['address', 'sniffer', 'received'])
         ]
 
-    address = models.IntegerField(null=False)
+    address = models.IntegerField(null=True, default=None)
     sniffer = models.ForeignKey(Sniffer, on_delete=models.SET_NULL, blank=True, null=True)
+    received = models.DateTimeField(auto_created=False, auto_now_add=False, auto_now=False, blank=True, null=True)
+    type = models.CharField(max_length=3, choices=MESSAGE_TYPE, default='def')
+    asset_type = models.CharField(max_length=50, null=True, blank=True)
+    command = models.CharField(max_length=255, blank=True, null=True)
+    parameters = models.CharField(max_length=1000, blank=True, null=True)
+    unplausible = models.BooleanField(default=False, null=False, blank=True)
 
     def __str__(self):
         return self.address

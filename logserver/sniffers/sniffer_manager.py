@@ -19,6 +19,7 @@
 
 import logging
 import time
+import threading
 from datetime import datetime
 
 from dateutil import tz
@@ -29,40 +30,53 @@ from sniffer.models import Sniffer
 logger = logging.getLogger("logserver")
 
 
-def check_active_sniffer():
-    while True:
-        sniffers = Sniffer.objects.all()
-        for sniffer in sniffers:
-            django_tz = tz.gettz(settings.TIME_ZONE)
-            now = datetime.now(django_tz)
-            delta = now - sniffer.last_connection
-            delta_seconds = delta.total_seconds()
+class SnifferManager(threading.Thread):
 
-            logger.debug("==============================================================================================")
-            logger.debug("Checking Sniffer")
-            logger.debug("Hostname %s " % sniffer.hostname)
-            logger.debug("Last Connection Time: %s" % sniffer.last_connection)
-            logger.debug("time delta: %s" % delta)
-            logger.debug("delta_seconds: %s" % delta_seconds)
-            logger.debug("Connected: %s" % sniffer.is_connected)
-            logger.debug("==============================================================================================")
+    def __init__(self, name=settings.SNIFFER_MANAGER_THREAD_NAME):
+        self._stopevent = threading.Event()
+        self._sleepperiod = 10.0
+        threading.Thread.__init__(self, name=name)
 
-            # if delta between two heartbeats is greather than 20 seconds, 2 heartbeats are missed
-            if delta_seconds >= 60.0:
-                sniffer.is_connected = False
-                sniffer.save()
-                try:
-                    sniffer.delete()
-                    logger.info("Removed Sniffer %s because of inactivity" % sniffer.hostname)
-                except Exception as e:
-                    logger.error("Cannot remove not connected sniffer %s: %s" % (sniffer.hostname, e))
-            if 11.0 < delta_seconds < (settings.SNIFFER_MISSED_HEARTBEATS * 10.0):
-                sniffer.is_connected = False
-                sniffer.save()
-                logger.info("Sniffer %s no longer connected" % sniffer.hostname)
-            elif delta_seconds < 11.0:
-                sniffer.is_connected = True
-                sniffer.save()
-                logger.info("Sniffer %s connected" % sniffer.hostname)
+    def run(self):
+        while not self._stopevent.isSet():
+            sniffers = Sniffer.objects.all()
+            for sniffer in sniffers:
+                django_tz = tz.gettz(settings.TIME_ZONE)
+                now = datetime.now(django_tz)
+                delta = now - sniffer.last_connection
+                delta_seconds = delta.total_seconds()
 
-        time.sleep(10)
+                logger.debug("==============================================================================================")
+                logger.debug("Checking Sniffer")
+                logger.debug("Hostname %s " % sniffer.hostname)
+                logger.debug("Last Connection Time: %s" % sniffer.last_connection)
+                logger.debug("time delta: %s" % delta)
+                logger.debug("delta_seconds: %s" % delta_seconds)
+                logger.debug("Connected: %s" % sniffer.is_connected)
+                logger.debug("==============================================================================================")
+
+                # if delta between two heartbeats is greather than 20 seconds, 2 heartbeats are missed
+                if delta_seconds >= 60.0:
+                    sniffer.is_connected = False
+                    sniffer.save()
+                    try:
+                        sniffer.delete()
+                        logger.info("Removed Sniffer %s because of inactivity" % sniffer.hostname)
+                    except Exception as e:
+                        logger.error("Cannot remove not connected sniffer %s: %s" % (sniffer.hostname, e))
+                if 11.0 < delta_seconds < (settings.SNIFFER_MISSED_HEARTBEATS * 10.0):
+                    sniffer.is_connected = False
+                    sniffer.save()
+                    logger.info("Sniffer %s no longer connected" % sniffer.hostname)
+                elif delta_seconds < 11.0:
+                    sniffer.is_connected = True
+                    sniffer.save()
+                    logger.info("Sniffer %s connected" % sniffer.hostname)
+
+            self._stopevent.wait(self._sleepperiod)
+
+    def join(self, timeout=None):
+        self._stopevent.set()
+        logger.info("Set Stop Event %s" % self._stopevent)
+        threading.Thread.join(self, 5)
+        raise StopIteration

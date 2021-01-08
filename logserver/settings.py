@@ -35,7 +35,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 CONSOLE_RECONNECT_INTERVALL = 5000
 CONSOLE_RECONNECT_ATTEMPTS = 'null'
 SNIFFER_MISSED_HEARTBEATS = 2
-MESSAGE_RETENTION_TIME = 86400
+SNIFFER_CONNECT_TO_PORT = 11337
+SNIFFER_MANAGER_THREAD_NAME = 'sniffer-manager-thread'
+SNIFFER_SERVER_THREAD_NAME = 'sniffer-server-thread'
+MESSAGE_RETENTION_TIME = 20  # 86400
 
 # Application definition
 
@@ -46,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     # Third Party Packages
     'channels',
@@ -54,7 +58,6 @@ INSTALLED_APPS = [
     # Application Packages
     'appsettings',
     'console',
-    'core',
     'logsearch',
     'railmessages',
     'sniffer',
@@ -123,7 +126,7 @@ Q_CLUSTER = {
     'queue_limit': 50,
     'bulk': 10,
     'orm': 'default',
-    'save_limit': -1,
+    'save_limit': 250,
     'guard_loop': 30
 }
 MESSAGE_TAGS = {
@@ -155,13 +158,13 @@ LOGGING = {
             'stream': sys.stdout
         },
         'django.console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'logserver.console',
             'stream': sys.stdout
         },
         'qconsole': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'logserver.console',
             'stream': sys.stdout

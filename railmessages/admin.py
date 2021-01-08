@@ -16,5 +16,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from django.contrib import admin
+from .models import CommandMessage, RawMessage
+
 
 # Register your models here.
+
+class RawMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'msg_type', 'msg_raw', 'received')
+
+
+class CommandMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'type', 'address', 'sniffer_id', 'received', 'command', 'parameters')
+
+
+admin.site.register(RawMessage, RawMessageAdmin)
+admin.site.register(CommandMessage, CommandMessageAdmin)

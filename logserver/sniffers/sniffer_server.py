@@ -20,36 +20,48 @@
 import json
 import logging
 from socket import *
-
+import threading
 from django_q.tasks import async_task
+from django.conf import settings
 
 logger = logging.getLogger("logserver")
-server_socket = None
 
 
-def sniffer_server(port):
-    logger.info("Starting Sniffer Server on port %s" % port)
-    global server_socket
-    server_socket = socket(AF_INET, SOCK_DGRAM)
-    try:
-        server_socket.bind(('', port))
-        logger.info("Sniffer Server Ready to receive data")
-    except Exception as e:
-        logger.error("Cannot start Sniffer Server %s" % e)
+class SnifferServer(threading.Thread):
 
-    while True:
-        message, client_address = server_socket.recvfrom(2048)
+    def __init__(self, port, name=settings.SNIFFER_SERVER_THREAD_NAME):
+        self._stopevent = threading.Event()
+        self._sleepperiod = 0.0
+        self.port = port
+        threading.Thread.__init__(self, name=name)
 
-        if message:
-            msg = message.decode("utf-8").replace("'", '"')
-            jmsg = json.loads(msg)
-            msg_type = jmsg['type']
+    def run(self):
+        logger.info("Starting Sniffer Server on port %s" % self.port)
+        server_socket = socket(AF_INET, SOCK_DGRAM)
+        try:
+            server_socket.bind(('', self.port))
+            logger.info("Sniffer Server Ready to receive data")
+        except Exception as e:
+            logger.error("Cannot start Sniffer Server %s" % e)
 
-            if msg_type == 'heartbeat':
-                async_task("logserver.tasks.process_heartbeat", message, client_address, q_options={'task_name': 'sniffer-heartbeat'})
-            elif msg_type == 'dcc':
-                async_task("logserver.tasks.process_rail_message", message, client_address, q_options={'task_name': 'sniffer-message'})
-            elif msg_type == 'mfx':
-                async_task("logserver.tasks.process_rail_message", message, client_address, q_options={'task_name': 'sniffer-message'})
-            else:
-                logger.error("Unknown message received, will be discarded.")
+        while not self._stopevent.isSet():
+            message, client_address = server_socket.recvfrom(2048)
+
+            if message:
+                msg = message.decode("utf-8").replace("'", '"')
+                jmsg = json.loads(msg)
+                msg_type = jmsg['type']
+
+                if msg_type == 'heartbeat':
+                    async_task("logserver.tasks.process_heartbeat", message, client_address, q_options={'task_name': 'sniffer-heartbeat'})
+                elif msg_type == 'dcc':
+                    async_task("logserver.tasks.process_rail_message", message, client_address, q_options={'task_name': 'sniffer-message'})
+                elif msg_type == 'mfx':
+                    async_task("logserver.tasks.process_rail_message", message, client_address, q_options={'task_name': 'sniffer-message'})
+                else:
+                    logger.error("Unknown message received, will be discarded.")
+            self._stopevent.wait(self._sleepperiod)
+
+    def join(self, timeout=None) -> None:
+        self._stopevent.set()
+        threading.Thread.join(self, timeout)
