@@ -28,7 +28,6 @@ from logserver import tasks
 from .models import Appsettings
 from django_q.tasks import async_task
 
-
 logger = logging.getLogger("logserver")
 
 
@@ -70,7 +69,7 @@ def server_shutdown(request):
     logger.info("SHUTDOWN RECEIVED -- Server is shutting down")
     if request.method == 'POST':
         tasks.stop_server()
-        #async_task("logserver.tasks.stop_server", q_options={'task_name': 'stop_server'})
+        # async_task("logserver.tasks.stop_server", q_options={'task_name': 'stop_server'})
         return HttpResponse(200, "Server Shutdown")
     else:
         return redirect("appsettings-index")
@@ -91,18 +90,17 @@ def stop_sniffer_manager(request):
     messages.success(request, 'Added Job to stop the Sniffer Manager')
     return redirect("appsettings-index")
 
+
 def stop_sniffer_server(request):
     async_task("logserver.tasks.stop_sniffer_server", q_options={'task_name': 'stop_sniffer_server'})
     messages.success(request, 'Added Job to stop the Sniffer Server')
     return redirect("appsettings-index")
 
 
-def dump_data_csv(request):
-    pass
-
-
 def dump_data_json(request):
-    pass
+    async_task("logserver.tasks.dump_data_to_json", q_options={'task_name': 'dump_to_json'})
+    messages.success(request, 'Added Job to dump Messages to json. File will be stored in ./media')
+    return redirect("appsettings-index")
 
 
 def cleanup_database(request):

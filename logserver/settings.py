@@ -24,9 +24,10 @@ from dj_database_url import parse as db_url
 from django.contrib.messages import constants as messages
 
 # OMRR Settings
-ASGI_APPLICATION = 'logserver.routing.application'
+ASGI_APPLICATION = 'logserver.asgi.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
+INSTALLED = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool, default=True)
@@ -117,14 +118,24 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 LOGIN_REDIRECT_URL = '/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
+# Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+# Django Q Cluster
 Q_CLUSTER = {
     'name': 'omrr-logserver',
-    'workers': 4,
+    'workers': 10,
     'timeout': 60,
     'retry': 120,
-    'queue_limit': 50,
-    'bulk': 10,
+    'queue_limit': 500,
+    'bulk': 50,
     'orm': 'default',
     'save_limit': 250,
     'guard_loop': 30

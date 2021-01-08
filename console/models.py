@@ -16,3 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+from django.db import models
+
+
+class Clients(models.Model):
+    channel_name = models.CharField(max_length=512)
+    verbose_name = models.CharField(max_length=512, unique=True)
+
+    def __str__(self):
+        return self.channel_name

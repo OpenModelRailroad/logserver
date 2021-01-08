@@ -41,16 +41,18 @@ urlpatterns = [
 
 # Add one time start elements here
 '''
-Comment this block out to migrate database and not starting the cluster and sniffer server
+To migrate Database set INSTALLED to False in settings
 '''
-# Start Message Cluster
-logger.info("Start the Message Cluster")
-tasks.start_message_cluster()
+if djsettings.INSTALLED:
+    # Start Message Cluster
+    logger.info("Start the Message Cluster")
+    tasks.start_message_cluster()
 
-# Start the Sniffer Server
-logger.info("Starting Sniffer Server and Management")
-async_task("logserver.tasks.start_sniffer_manager", q_options={'task_name': 'start-sniffer-manager'})
-async_task("logserver.tasks.start_sniffer_server", q_options={'task_name': 'start-sniffer-server'})
+    # Start the Sniffer Server
+    logger.info("Starting Sniffer Server and Management")
+    async_task("logserver.tasks.remove_all_messages", q_options={'task_name': 'remove-all-messages'})
+    async_task("logserver.tasks.start_sniffer_manager", q_options={'task_name': 'start-sniffer-manager'})
+    async_task("logserver.tasks.start_sniffer_server", q_options={'task_name': 'start-sniffer-server'})
 '''
-END --- Comment this block out to migrate database and not starting the cluster and sniffer server
+END --- After migration change INSTALLED back to True
 '''

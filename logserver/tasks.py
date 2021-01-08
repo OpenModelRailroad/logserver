@@ -20,16 +20,22 @@ import json
 import logging
 import sys
 from datetime import datetime, timedelta
-
+from django.core.management import call_command
+import os
 from django.conf import settings
 from django.utils import timezone
 from django_q.cluster import Cluster
+from django.utils import timezone
 from django_q.monitor import Stat
 
 from railmessages.models import RawMessage, CommandMessage
 from sniffer.models import Sniffer
 from .dccpi import DCCDecoder
+from .mfx import MFXDecoder
 from .sniffers import SnifferInit
+from channels.layers import get_channel_layer
+from console.models import Clients
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger("logserver")
 
@@ -50,10 +56,7 @@ def start_message_cluster():
 
 
 def stop_server():
-    print("hello berfore")
-    for stat in Stat.get_all():
-        print("hello")
-    #cluster.stop()
+    # cluster.stop()
     sys.exit()
 
 
@@ -108,36 +111,47 @@ def restart_sniffer_manager():
     stop_sniffer_manager()
     start_sniffer_manager()
 
+    # Messages
 
-# Messages
+
 def process_rail_message(message, client_address):
     msg = message.decode("utf-8").replace("'", '"')
     jmsg = json.loads(msg)
     msg_type = jmsg['type']
 
-    if msg_type == 'dcc':
-        logger.debug("Received dcc msg: %s" % jmsg['raw'])
-        try:
-            sniffer = Sniffer.objects.get(port=client_address[1])
-            RawMessage.objects.create(
-                msg_type=jmsg['type'],
-                msg_json=jmsg,
-                msg_raw=jmsg['raw'],
-                sniffer_id=sniffer.id
-            ).save()
-        except Sniffer.DoesNotExist:
-            logger.info("Sniffer does not exist. packet cannot be saved")
+    try:
+        layer = get_channel_layer()
+        async_to_sync(layer.group_send)('console', {
+            'type': 'console.message',
+            'content': 'triggered'
+        })
+        sniffer = Sniffer.objects.get(port=client_address[1])
+        raw = RawMessage.objects.create(
+            msg_type=jmsg['type'],
+            msg_json=jmsg,
+            msg_raw=jmsg['raw'],
+            sniffer_id=sniffer.id
+        ).save()
 
-        decoder = DCCDecoder('0b' + jmsg['raw'])
-        address = decoder.get_address()
-        command = decoder.get_command()
-        logger.info("DCC Message for %d, Command %s " % (address, command))
-    elif msg_type == 'mfx':
-        #TODO make MFX possible
-        pass
-    else:
-        logger.error("Unknown Message Received")
-        # Todo maybe save in a own table for later processing / showing to user
+        if msg_type == 'dcc':
+
+            decoder = DCCDecoder('0b' + jmsg['raw'])
+            logger.info(decoder)
+            CommandMessage.objects.create(address=decoder.get_address(), command=decoder.get_command(), sniffer_id=sniffer.id, received=timezone.now(),
+                                          type="dcc")
+            #async_to_sync(channel_layer.group_send)("console_name", {"type": "console_message", "text": decoder})
+
+        elif msg_type == 'mfx':
+            decoder = MFXDecoder(jmsg['raw'])
+            logger.info(decoder)
+            CommandMessage.objects.create(address=decoder.get_address(), command=decoder.get_command(), parameters=decoder.get_parameters(), asset_type='loco',
+                                          sniffer_id=sniffer.id, received=timezone.now(), type="mfx")
+            #async_to_sync(channel_layer.group_send)("console_name", {"type": "console_message", "text": decoder})
+        else:
+            logger.error("Unknown Message Received")
+
+    except Sniffer.DoesNotExist:
+        logger.info("Sniffer does not exist. packet cannot be saved")
 
 
 def process_heartbeat(message, client_address):
@@ -168,6 +182,14 @@ def process_heartbeat(message, client_address):
 
 
 # Database Management
+
+# dump to json
+def dump_data_to_json():
+    output = open(os.path.join(settings.MEDIA_ROOT, 'dump.json'), 'w')
+    call_command('dumpdata', 'railmessages', format='json', indent=3, stdout=output)
+    output.close()
+
+
 # Removes all Messages in (rawmessage, commandmessage, unplausiblemessage) older than 24h from now
 def cleanup_database():
     RawMessage.objects.filter(received__lte=timezone.now() - timedelta(seconds=settings.MESSAGE_RETENTION_TIME)).delete()

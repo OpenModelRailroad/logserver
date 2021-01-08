@@ -28,7 +28,6 @@ urlpatterns = [
     path('restart-sniffer-server/', views.restart_sniffer_server, name='appsettings-restart-sniffer-server'),
     path('stop-sniffer-manager/', views.stop_sniffer_manager, name='appsettings-stop-sniffer-manager'),
     path('stop-sniffer-server/', views.stop_sniffer_server, name='appsettings-stop-sniffer-server'),
-    path('dump-data-csv/', views.dump_data_csv, name='appsettings-dump-data-csv'),
     path('dump-data-json/', views.dump_data_json, name='appsettings-dump-data-json'),
     path('cleanup-database/', views.cleanup_database, name='appsettings-cleanup-database'),
     path('remove-all-messages/', views.remove_all_messages, name='appsettings-remove-all-messages'),

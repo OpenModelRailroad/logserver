@@ -148,6 +148,8 @@
         logSocket.onmessage = function (e) {
             setStatus('CONNECTED');
 
+
+
             const data = JSON.parse(e.data);
             const messagelog = document.querySelector('#message-log');
 
