@@ -24,7 +24,6 @@ from dj_database_url import parse as db_url
 from django.contrib.messages import constants as messages
 
 # OMRR Settings
-ASGI_APPLICATION = 'logserver.asgi.application'
 WSGI_APPLICATION = 'logserver.wsgi.application'
 
 INSTALLED = True
@@ -39,7 +38,10 @@ SNIFFER_MISSED_HEARTBEATS = 2
 SNIFFER_CONNECT_TO_PORT = 11337
 SNIFFER_MANAGER_THREAD_NAME = 'sniffer-manager-thread'
 SNIFFER_SERVER_THREAD_NAME = 'sniffer-server-thread'
-MESSAGE_RETENTION_TIME = 20  # 86400
+MESSAGE_PUSHER_THREAD_NAME = 'message-pusher-thread'
+MESSAGE_RETENTION_TIME = 86400
+
+WS_URI = 'ws://127.0.0.1:8000/ws/console/'
 
 # Application definition
 
@@ -121,12 +123,7 @@ LOGIN_REDIRECT_URL = '/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
-# Django Channels
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
+
 
 # Django Q Cluster
 Q_CLUSTER = {
@@ -222,3 +219,11 @@ LOGGING = {
     }
 
 }
+
+# Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+ASGI_APPLICATION = 'logserver.asgi.application'

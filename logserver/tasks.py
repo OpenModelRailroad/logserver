@@ -28,6 +28,8 @@ from django_q.cluster import Cluster
 from django.utils import timezone
 from django_q.monitor import Stat
 
+from django.db import connection
+
 from railmessages.models import RawMessage, CommandMessage
 from sniffer.models import Sniffer
 from .dccpi import DCCDecoder
@@ -36,6 +38,11 @@ from .sniffers import SnifferInit
 from channels.layers import get_channel_layer
 from console.models import Clients
 from asgiref.sync import async_to_sync
+from django_q.tasks import async_task
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 logger = logging.getLogger("logserver")
 
@@ -78,6 +85,11 @@ def get_cluster_stats():
     return cluster.stat
 
 
+def start_message_pusher():
+    sniffers.stop_message_pusher_thread()
+    sniffers.start_message_pusher_thread()
+
+
 # Sniffer Server
 def start_sniffer_server():
     sniffers.stop_sniffer_server_thread()
@@ -111,7 +123,18 @@ def restart_sniffer_manager():
     stop_sniffer_manager()
     start_sniffer_manager()
 
-    # Messages
+
+def console_test():
+    channel_layer = get_channel_layer()
+    print(channel_layer)
+    print("HELLO")
+    async_to_sync(channel_layer.group_send)(
+        'chat',
+        {
+            'type': 'chat.message',
+            'text': json.dumps({"type": "order", "message": "order 66 executed from task"})
+        }
+    )
 
 
 def process_rail_message(message, client_address):
@@ -120,13 +143,8 @@ def process_rail_message(message, client_address):
     msg_type = jmsg['type']
 
     try:
-        layer = get_channel_layer()
-        async_to_sync(layer.group_send)('console', {
-            'type': 'console.message',
-            'content': 'triggered'
-        })
         sniffer = Sniffer.objects.get(port=client_address[1])
-        raw = RawMessage.objects.create(
+        RawMessage.objects.create(
             msg_type=jmsg['type'],
             msg_json=jmsg,
             msg_raw=jmsg['raw'],
@@ -139,14 +157,17 @@ def process_rail_message(message, client_address):
             logger.info(decoder)
             CommandMessage.objects.create(address=decoder.get_address(), command=decoder.get_command(), sniffer_id=sniffer.id, received=timezone.now(),
                                           type="dcc")
-            #async_to_sync(channel_layer.group_send)("console_name", {"type": "console_message", "text": decoder})
+
+
+
 
         elif msg_type == 'mfx':
             decoder = MFXDecoder(jmsg['raw'])
             logger.info(decoder)
-            CommandMessage.objects.create(address=decoder.get_address(), command=decoder.get_command(), parameters=decoder.get_parameters(), asset_type='loco',
+            CommandMessage.objects.create(address=decoder.get_address(), command=decoder.get_command(), parameters=decoder.get_parameters(),
+                                          asset_type='loco',
                                           sniffer_id=sniffer.id, received=timezone.now(), type="mfx")
-            #async_to_sync(channel_layer.group_send)("console_name", {"type": "console_message", "text": decoder})
+
         else:
             logger.error("Unknown Message Received")
 
@@ -198,5 +219,15 @@ def cleanup_database():
 
 # in (rawmessage, commandmessage, unplausiblemessage)
 def remove_all_messages():
-    RawMessage.objects.all().delete()
-    CommandMessage.objects.all().delete()
+    with connection.cursor() as cursor:
+        cursor.execute("delete from django_q_ormq where 1 = 1")
+        cursor.execute("delete from railmessages_rawmessage where 1=1")
+        cursor.execute("delete from railmessages_commandmessage where 1=1")
+        cursor.execute("delete from console_clients where 1=1")
+        cursor.execute("delete from sniffer_sniffer where 1=1")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'django_q_ormq'")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'railmessages_rawmessage'")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'railmessages_commandmessage'")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'console_clients'")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'console_clients'")
+        cursor.execute("update sqlite_sequence set seq = 0 where name = 'sniffer_sniffer'")

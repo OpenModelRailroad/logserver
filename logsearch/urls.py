@@ -21,5 +21,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='logsearch-index')
+    path('', views.index, name='logsearch-index'),
+    path('sql/', views.execute_sql, name='logsearch-sql'),
 ]

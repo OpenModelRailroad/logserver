@@ -41,6 +41,7 @@
                           readonly="readonly"></textarea><br>
 
                 <div class="form-group">
+                    <!--
                     Filter:
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" id="locoCheckbox" checked>
@@ -62,6 +63,7 @@
                         <label class="form-check-label" for="connectionCheckbox"><img class="cb-icon"
                                                                                       src="{% static 'images/connection.png' %}"></label>
                     </div>
+                    -->
 
                     <div class="form-check form-check-inline float-right">
                         <input class="form-check-input" type="checkbox" id="scrollCheckbox" checked>
@@ -144,32 +146,22 @@
         })
 
 
-
         logSocket.onmessage = function (e) {
             setStatus('CONNECTED');
 
 
-
             const data = JSON.parse(e.data);
             const messagelog = document.querySelector('#message-log');
+
+            console.log(data)
 
             if (data.type === 'console') {
                 message_storage.push(data);
                 message_count++;
 
                 switch (data.category) {
-                    case 'loco':
-                        if (document.getElementById("locoCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                        break;
-                    case 'signal':
-                        if (document.getElementById("signalCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                        break;
-                    case 'switch':
-                        if (document.getElementById("switchCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                        break;
-                    case 'connection':
-                        if (document.getElementById("connectionCheckbox").checked) messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
-                        break;
+                    case 'undefined':
+                        messagelog.value += (data.timestamp + ' | ' + data.message + '\n');
                 }
                 if (document.getElementById("scrollCheckbox").checked) {
                     const textarea = document.getElementById('message-log');
@@ -179,11 +171,16 @@
                 // Stats Panel Update in RT
                 document.getElementById('stats-num-sniffer').innerText = data.sniffers;
                 document.getElementById('stats-num-messages').innerText = message_count;
-            } else {
+            } else if (data.type === 'ready') {
+                setStatus('CONNECTED')
+                console.log("Connected to LogServer")
+            } else if (data.type === 'unplausible') {
                 addUnplausibleMessage(data)
+            } else if (data.type === 'order') {
+                console.log("order received")
+            } else {
+                console.error("message type not known")
             }
-
-
         }
 
         logSocket.onerror = function () {
@@ -192,16 +189,13 @@
 
         logSocket.onclose = function () {
             setStatus('CLOSED')
-            // wait 5 seconds and try to reconnect
-            // console.error("Connection closed, try to reconnect to " + wsLocation)
-            // setTimeout(() => connect(wsLocation), 5000)
         };
 
         logSocket.onopen = function () {
             console.log('connecting to ws://' + window.location.host + '/ws/console/');
             setStatus('CONNECTING')
             logSocket.send(JSON.stringify({
-                'message': 'ready'
+                'type': 'ready'
             }));
         }
 

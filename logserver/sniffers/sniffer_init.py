@@ -22,6 +22,7 @@ import time
 from django.conf import settings
 from .sniffer_manager import SnifferManager
 from .sniffer_server import SnifferServer
+from .message_pusher import MessagePusher
 
 logger = logging.getLogger(__name__)
 stop_threads = False
@@ -34,6 +35,13 @@ class SnifferInit:
     def __init__(self):
         self.sniffer_manager_running = True
         self.sniffer_server_running = True
+        self.message_pusher_running = True
+
+    def set_message_pusher_running(self, status):
+        self.message_pusher_running = status
+
+    def is_message_pusher_running(self):
+        return self.message_pusher_running
 
     def set_sniffer_manager_running(self, status):
         self.sniffer_manager_running = status
@@ -50,6 +58,7 @@ class SnifferInit:
     def stop_all_threads(self):
         self.set_sniffer_manager_running(False)
         self.set_sniffer_server_running(False)
+        self.set_message_pusher_running(False)
         for thread in self.threadpool:
             thread.join()
 
@@ -66,6 +75,16 @@ class SnifferInit:
         logger.info("Stopping Sniffer Server")
         self.set_sniffer_server_running(False)
         self.stop_named_thread(settings.SNIFFER_SERVER_THREAD_NAME)
+
+    def stop_message_pusher_thread(self):
+        logger.info("Stopping Message Pusher")
+        self.set_message_pusher_running(False)
+        self.stop_named_thread(settings.MESSAGE_PUSHER_THREAD_NAME)
+
+    def start_message_pusher_thread(self):
+        self.set_message_pusher_running(True)
+        pusher_thread = MessagePusher()
+        pusher_thread.start()
 
     # Start the check thread to check for active sniffers
     def start_sniffer_manager_thread(self):

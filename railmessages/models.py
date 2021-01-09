@@ -58,6 +58,7 @@ class CommandMessage(models.Model):
     command = models.CharField(max_length=255, blank=True, null=True)
     parameters = models.CharField(max_length=1000, blank=True, null=True)
     unplausible = models.BooleanField(default=False, null=False, blank=True)
+    console = models.BooleanField(default=False, null=False, blank=True)
 
     def __str__(self):
         return self.address

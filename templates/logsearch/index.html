@@ -91,6 +91,7 @@
     </div>
 
     <script>
+
         $(document).ready(function () {
 
             $("#statement-ok").hide();
@@ -116,7 +117,23 @@
                 } else if (!searchterm.startsWith("select")) {
                     alert("only select statements are allowed")
                 } else {
-                    alert("tried to send advanced form " + searchterm);
+
+                    let cookie = document.cookie;
+                    let csrfToken = cookie.substring(cookie.indexOf('=') + 1);
+
+                    $.ajax({
+                        url: '{% url 'logsearch-sql' %}',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        },
+                        data: {
+                            'sql': searchterm
+                        },
+                        dataType: 'json',
+                        success: (data) => {showResults(data)},
+                    });
+
                 }
             })
 
@@ -131,6 +148,10 @@
                 $("#statement-ok").hide();
                 $("#statement-nok").show();
             }
+        }
+
+        function showResults(results) {
+            console.log(results)
         }
 
     </script>

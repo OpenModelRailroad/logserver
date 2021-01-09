@@ -53,6 +53,7 @@ if djsettings.INSTALLED:
     async_task("logserver.tasks.remove_all_messages", q_options={'task_name': 'remove-all-messages'})
     async_task("logserver.tasks.start_sniffer_manager", q_options={'task_name': 'start-sniffer-manager'})
     async_task("logserver.tasks.start_sniffer_server", q_options={'task_name': 'start-sniffer-server'})
+    async_task("logserver.tasks.start_message_pusher", q_options={'task_name': 'start-message-pusher'})
 '''
 END --- After migration change INSTALLED back to True
 '''

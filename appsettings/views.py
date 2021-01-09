@@ -28,6 +28,10 @@ from logserver import tasks
 from .models import Appsettings
 from django_q.tasks import async_task
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
+
 logger = logging.getLogger("logserver")
 
 
@@ -113,4 +117,19 @@ def cleanup_database(request):
 def remove_all_messages(request):
     async_task("logserver.tasks.remove_all_messages", q_options={'task_name': 'remove_all_messages'})
     messages.success(request, 'Added Job to remove all messages')
+    return redirect("appsettings-index")
+
+
+def console_test(request):
+    channel_layer = get_channel_layer()
+    print(channel_layer)
+    async_to_sync(channel_layer.group_send)(
+        'chat',
+        {
+            'type': 'chat.message',
+            'text': json.dumps({"type": "order", "message": "order 66 executed "})
+        }
+    )
+    async_task("logserver.tasks.console_test", q_options={'task_name': 'order_66'}, sync=True)
+    messages.success(request, 'Added order 66')
     return redirect("appsettings-index")

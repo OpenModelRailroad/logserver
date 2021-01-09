@@ -16,9 +16,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from railmessages.models import RawMessage
+import logging
+
+logger = logging.getLogger('logserver')
 
 
 # Create your views here.
 def index(request):
     return render(request, 'logsearch/index.html')
+
+
+def execute_sql(request):
+    if request.method == 'POST':
+        logger.info(request.POST['sql'])
+        return render(request, 'logsearch/index.html')

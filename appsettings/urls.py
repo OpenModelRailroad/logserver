@@ -31,4 +31,5 @@ urlpatterns = [
     path('dump-data-json/', views.dump_data_json, name='appsettings-dump-data-json'),
     path('cleanup-database/', views.cleanup_database, name='appsettings-cleanup-database'),
     path('remove-all-messages/', views.remove_all_messages, name='appsettings-remove-all-messages'),
+    path('cs-test/', views.console_test, name='appsettings-console-test'),
 ]
