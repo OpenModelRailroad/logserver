@@ -2,7 +2,7 @@ ansicon==1.89.0
 arrow==0.16.0
 asgiref==3.3.1
 attrs==19.3.0
-autobahn==20.4.3
+autobahn==20.12.3
 Automat==20.2.0
 bitstring==3.1.7
 blessed==1.17.10
